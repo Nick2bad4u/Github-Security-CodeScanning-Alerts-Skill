@@ -1,30 +1,38 @@
-# SonarCloud Skill
+# GitHub Security Alerts Skill
 
-[![latest GitHub release.](https://flat.badgen.net/github/release/Nick2bad4u/SonarCloud-Skill?color=cyan)](https://github.com/Nick2bad4u/SonarCloud-Skill/releases) [![GitHub stars.](https://flat.badgen.net/github/stars/Nick2bad4u/SonarCloud-Skill?color=yellow)](https://github.com/Nick2bad4u/SonarCloud-Skill/stargazers) [![GitHub forks.](https://flat.badgen.net/github/forks/Nick2bad4u/SonarCloud-Skill?color=green)](https://github.com/Nick2bad4u/SonarCloud-Skill/forks) [![GitHub open issues.](https://flat.badgen.net/github/open-issues/Nick2bad4u/SonarCloud-Skill?color=red)](https://github.com/Nick2bad4u/SonarCloud-Skill/issues) [![GitHub PRs.](https://flat.badgen.net/github/open-prs/Nick2bad4u/SonarCloud-Skill?color=orange)](https://github.com/Nick2bad4u/SonarCloud-Skill/pulls?q=sort%3Aupdated-desc+is%3Apr+is%3Aopen) [![GitHub license](https://flat.badgen.net/github/license/Nick2bad4u/SonarCloud-Skill?color=purple)](https://github.com/Nick2bad4u/SonarCloud-Skill/blob/main/LICENSE) [![GitHub Dependabot](https://flat.badgen.net/github/dependabot/Nick2bad4u/SonarCloud-Skill?color=blue)](https://github.com/Nick2bad4u/SonarCloud-Skill/network/updates) 
+[![latest GitHub release.](https://flat.badgen.net/github/release/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill?color=cyan)](https://github.com/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill/releases) [![GitHub stars.](https://flat.badgen.net/github/stars/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill?color=yellow)](https://github.com/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill/stargazers) [![GitHub forks.](https://flat.badgen.net/github/forks/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill?color=green)](https://github.com/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill/forks) [![GitHub open issues.](https://flat.badgen.net/github/open-issues/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill?color=red)](https://github.com/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill/issues) [![GitHub PRs.](https://flat.badgen.net/github/open-prs/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill?color=orange)](https://github.com/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill/pulls?q=sort%3Aupdated-desc+is%3Apr+is%3Aopen) [![GitHub license](https://flat.badgen.net/github/license/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill?color=purple)](https://github.com/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill/blob/main/LICENSE) [![GitHub Dependabot](https://flat.badgen.net/github/dependabot/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill?color=blue)](https://github.com/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill/network/updates)
 
-A Copilot / AI skill for inspecting and managing **SonarCloud** and **SonarQube** findings.
+A Copilot / AI skill for inspecting and managing GitHub repository security alerts across:
+
+- code scanning
+- Dependabot
+- Dependabot malware
+- secret scanning
 
 This repository provides:
 
-- a reusable `sonar-manage-findings` skill (`.github/skills/sonar-manage-findings/SKILL.md`)
-- a Python CLI helper to query and triage project findings
-- GitHub automation for security/scanning hygiene
+- a reusable `github-manage-security-alerts` skill (`.github/skills/github-manage-security-alerts/SKILL.md`)
+- a Python CLI helper to inspect and triage alerts
+- GitHub automation for release/security hygiene
 
 ---
 
 ## What this skill can do
 
-With a Sonar token in an environment variable, you can:
+With a GitHub token in an environment variable, you can:
 
-- summarize project quality state (issues, hotspots, quality gate, selected metrics)
-- list and inspect issues/hotspots
-- comment, assign, retag, and transition issues (`resolve`, `wontfix`, `falsepositive`, etc.)
-- review hotspots (`SAFE`, `FIXED`, etc.)
-- inspect measures, measure history, analyses, and Compute Engine tasks
-- inspect or mutate project settings, quality gate/profile association, and project tags
-- fall back to direct API calls for unsupported endpoints
+- summarize repository alert posture (`summary`)
+- export full alert snapshots for bulk triage (`export-alerts`)
+- list/show/update code scanning alerts
+- list/show/update Dependabot alerts
+- list/show/update malware alerts (Dependabot malware subset)
+- list/show/update secret scanning alerts
+- inspect secret locations and secret scan history
+- inspect repository security setup overview
+- perform bulk alert updates (`bulk-update-alerts`) with `--dry-run`
+- fall back to raw REST calls for unsupported endpoints (`api-call`)
 
-> The helper is repository-agnostic: pass `--repo` to any local checkout, or pass explicit `--project-key` / `--base-url`.
+> The helper is repository-agnostic: pass `--repo` to any local checkout, or pass explicit `--repository owner/repo`.
 
 ---
 
@@ -33,16 +41,15 @@ With a Sonar token in an environment variable, you can:
 ```text
 .github/
 	skills/
-		sonar-manage-findings/
+		github-manage-security-alerts/
 			SKILL.md
 			scripts/
-				manage_sonar_findings.py
-				sonar_manage_api.py
-				sonar_manage_common.py
-				sonar_manage_diagnostics.py
-				sonar_manage_issues.py
-				sonar_manage_project.py
-				sonar_manage_render.py
+				manage_github_security_alerts.py
+				github_security_api.py
+				github_security_cli.py
+				github_security_common.py
+				github_security_operations.py
+				github_security_render.py
 README.md
 CONTRIBUTING.md
 SECURITY.md
@@ -56,20 +63,20 @@ CHANGELOG.md
 ### 1) Prerequisites
 
 - Python 3.10+
-- A Sonar token exported to an environment variable (recommended: `SONAR_TOKEN`)
+- A GitHub token exported to an environment variable (recommended: `GITHUB_TOKEN`)
 
 ### 2) Set your token (do not pass it on CLI)
 
 #### PowerShell
 
 ```powershell
-$env:SONAR_TOKEN = "<your-token>"
+$env:GITHUB_TOKEN = "<your-token>"
 ```
 
 #### Bash
 
 ```bash
-export SONAR_TOKEN="<your-token>"
+export GITHUB_TOKEN="<your-token>"
 ```
 
 ### 3) Run the helper
@@ -77,13 +84,13 @@ export SONAR_TOKEN="<your-token>"
 From repository root:
 
 ```powershell
-python ".github/skills/sonar-manage-findings/scripts/manage_sonar_findings.py" summary --repo "."
+python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" summary --repo "."
 ```
 
 Machine-readable output:
 
 ```powershell
-python ".github/skills/sonar-manage-findings/scripts/manage_sonar_findings.py" summary --repo "." --json
+python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" summary --repo "." --json
 ```
 
 ---
@@ -91,25 +98,28 @@ python ".github/skills/sonar-manage-findings/scripts/manage_sonar_findings.py" s
 ## Common commands
 
 ```powershell
-# List open/reopened issues
-python ".github/skills/sonar-manage-findings/scripts/manage_sonar_findings.py" list-issues --repo "." --issue-statuses OPEN,CONFIRMED,REOPENED
+# Export full alert sets for triage
+python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" export-alerts --repo "." --json
 
-# Show issue activity
-python ".github/skills/sonar-manage-findings/scripts/manage_sonar_findings.py" issue-changelog --repo "." --issue AZ123
+# List open high/error code scanning alerts
+python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" list-code-scanning --repo "." --state open --severity high,error
 
-# Resolve an issue (dry-run first)
-python ".github/skills/sonar-manage-findings/scripts/manage_sonar_findings.py" transition-issue --repo "." --issue AZ123 --transition resolve --comment "Fixed in code." --dry-run
+# Dismiss a code scanning alert (dry-run first)
+python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" update-code-scanning --repo "." --alert 42 --state dismissed --dismissed-reason false_positive --comment "False positive after review." --dry-run
 
-# List hotspots awaiting review
-python ".github/skills/sonar-manage-findings/scripts/manage_sonar_findings.py" list-hotspots --repo "." --hotspot-status TO_REVIEW --include-details
+# List open Dependabot alerts
+python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" list-dependabot --repo "." --state open
 
-# Check quality gate
-python ".github/skills/sonar-manage-findings/scripts/manage_sonar_findings.py" quality-gate-status --repo "."
+# List open secret scanning alerts
+python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" list-secret-scanning --repo "." --state open
+
+# Bulk update (preview only)
+python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" bulk-update-alerts --repo "." --surface code-scanning --select-state open --target-state dismissed --dismissed-reason "false positive" --comment "Reviewed and intentionally dismissed." --limit 10 --dry-run --json
 ```
 
 For the full command surface and workflows, see:
 
-- `.github/skills/sonar-manage-findings/SKILL.md`
+- `.github/skills/github-manage-security-alerts/SKILL.md`
 
 ---
 
@@ -117,7 +127,7 @@ For the full command surface and workflows, see:
 
 - Never paste tokens into command arguments or commit them to git.
 - Prefer environment variables and secret managers.
-- Use `--dry-run` before bulk mutation actions.
+- Use `--dry-run` before mutation and bulk mutation actions.
 
 More details: [`SECURITY.md`](./SECURITY.md)
 
@@ -138,12 +148,12 @@ This repository includes a release workflow that creates a downloadable zip bund
 
 - Workflow: `.github/workflows/release-skill.yml`
 - Trigger:
-  - push a tag like `v0.1.0`
-  - run manually via **workflow_dispatch** with:
-    - `release_type`: `patch` / `minor` / `major`
-    - `version`: optional explicit `x.y.z` (overrides `release_type`)
-    - `ref`: branch to release from (default `main`)
-- Asset: `sonarcloud-skill-<tag>.zip`
+	- push a tag like `v0.1.0`
+	- run manually via **workflow_dispatch** with:
+		- `release_type`: `patch` / `minor` / `major`
+		- `version`: optional explicit `x.y.z` (overrides `release_type`)
+		- `ref`: branch to release from (default `main`)
+- Asset: `github-security-codescanning-alerts-skill-<tag>.zip`
 
 Examples:
 
@@ -153,12 +163,6 @@ gh workflow run "Release Skill Bundle" -f release_type=patch -f ref=main
 
 # Manual explicit release version
 gh workflow run "Release Skill Bundle" -f release_type=patch -f version=0.2.0 -f ref=main
-```
-
-### Create labels (with colors/descriptions)
-
-```powershell
-pwsh ./.github/scripts/bootstrap-labels.ps1 -Repo "Nick2bad4u/SonarCloud-Skill"
 ```
 
 ---

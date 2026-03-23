@@ -35,8 +35,8 @@ body:
       label: Steps to reproduce
       description: Include exact commands where possible.
       placeholder: |
-        1. Set SONAR_TOKEN ...
-        2. Run ...
+        1. Set GITHUB_TOKEN ...
+        2. Run `python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" summary --repo "."`
         3. Observe ...
     validations:
       required: true
@@ -72,8 +72,8 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: OS, Python version, shell, Sonar product (Cloud/Qube), etc.
-      placeholder: "Windows 11, Python 3.12, PowerShell 7.5, SonarCloud"
+      description: OS, Python version, shell, GitHub host (GitHub.com/GHES), repo context, etc.
+      placeholder: "Windows 11, Python 3.12, PowerShell 7.5, GitHub.com"
 
   - type: textarea
     id: logs

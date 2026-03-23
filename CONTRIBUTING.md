@@ -1,4 +1,4 @@
-## Contributing to SonarCloud Skill
+## Contributing to GitHub Security Alerts Skill
 
 Thanks for contributing.
 
@@ -22,8 +22,8 @@ python -m venv .venv
 From repo root, run:
 
 ```powershell
-python -m compileall ".github/skills/sonar-manage-findings/scripts"
-python ".github/skills/sonar-manage-findings/scripts/manage_sonar_findings.py" --help
+python -m compileall ".github/skills/github-manage-security-alerts/scripts"
+python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" --help
 ```
 
 If you touched command behavior, include example command invocations and expected output snippets in your PR description.
@@ -31,8 +31,8 @@ If you touched command behavior, include example command invocations and expecte
 ### Security requirements
 
 - **Do not** commit secrets.
-- **Do not** pass Sonar tokens as CLI literals.
-- Use environment variables (`SONAR_TOKEN` or `--token-env`).
+- **Do not** pass GitHub tokens as CLI literals.
+- Use environment variables (`GITHUB_TOKEN`, `GH_TOKEN`, or `--token-env`).
 - Prefer `--dry-run` for mutation commands in docs/examples.
 
 ### Commit messages

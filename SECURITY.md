@@ -2,12 +2,12 @@
 
 ## Supported scope
 
-This repository contains automation and helper scripts for SonarCloud/SonarQube project triage.
+This repository contains automation and helper scripts for GitHub repository security alert triage.
 
 Security-sensitive areas include:
 
 - credential/token handling
-- API mutation commands (`transition-issue`, `review-hotspot`, settings/profile/gate mutations)
+- API mutation commands (`update-code-scanning`, `update-dependabot`, `update-secret-scanning`, `bulk-update-alerts`)
 - workflow automation that can post comments or update repository state
 
 ## Reporting a vulnerability
@@ -23,19 +23,19 @@ Instead, contact the maintainer privately (for example via GitHub security repor
 
 ## Secret handling rules
 
-- Never hardcode Sonar tokens.
+- Never hardcode GitHub tokens.
 - Never include tokens in command arguments.
-- Use environment variables (e.g. `SONAR_TOKEN`).
+- Use environment variables (e.g. `GITHUB_TOKEN`, `GH_TOKEN`).
 - Prefer secret manager retrieval into environment variables.
 
 PowerShell example:
 
 ```powershell
-$env:SONAR_TOKEN = Get-Secret SONAR_TOKEN_TYPEFEST -AsPlainText
+$env:GITHUB_TOKEN = Get-Secret GITHUB_TOKEN -AsPlainText
 ```
 
 ## Operational safety
 
 - Use `--dry-run` for mutation commands before applying changes.
-- Verify target project key/base URL before running mutations.
-- Re-check state after changes (`summary`, issue/hotspot detail commands).
+- Verify target repository (`--repo` or `--repository owner/repo`) before running mutations.
+- Re-check state after changes (`summary`, list/show alert commands).

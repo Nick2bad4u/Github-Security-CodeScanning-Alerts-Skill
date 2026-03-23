@@ -16,3 +16,4 @@ and this project follows semantic versioning conventions where practical.
 ### Changed
 
 - Aligned Dependabot configuration with this repository's actual ecosystems.
+- Retargeted repository docs/templates/workflows from the prior template to the `github-manage-security-alerts` skill and this repository's URLs/commands.
