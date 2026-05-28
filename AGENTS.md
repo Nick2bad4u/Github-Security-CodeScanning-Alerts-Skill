@@ -1,0 +1,41 @@
+---
+name: "GitHub-Security-Alerts-Skill-Agent-Guidance"
+description: "Repository guidance for the GitHub security alerts management skill."
+applyTo: "**"
+---
+
+# GitHub Security Alerts Skill Guidance
+
+This repository packages the `github-manage-security-alerts` Codex skill. Keep changes focused on the skill payload under `.github/skills/github-manage-security-alerts/` and the small repository automation needed to publish it.
+
+## Scope
+
+- Treat `.github/skills/github-manage-security-alerts/SKILL.md` as the user-facing skill entrypoint.
+- Treat `.github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py` as the CLI entrypoint.
+- Keep helper modules in `.github/skills/github-manage-security-alerts/scripts/` stdlib-only unless a dependency is explicitly justified and documented.
+- Keep `agents/openai.yaml`, `assets/`, and `LICENSE.txt` synchronized with the packaged skill.
+
+## Security
+
+- Never put GitHub tokens in command arguments, docs examples, logs, commits, or chat output.
+- Prefer token environment variables such as `GITHUB_TOKEN`, `GH_TOKEN`, or a caller-specified `--token-env`.
+- Use `--dry-run` first for bulk updates, dismissals, reopen operations, or alert state transitions.
+- Do not dismiss or resolve security alerts unless the vulnerable path, secret exposure, or code scanning result has actually been reviewed.
+
+## Validation
+
+Run the narrowest useful checks after edits:
+
+```powershell
+python -m compileall .github/skills/github-manage-security-alerts/scripts
+python C:/Users/Nick/.codex/skills/.system/skill-creator/scripts/quick_validate.py .github/skills/github-manage-security-alerts
+```
+
+For behavior changes, also run the relevant CLI command with `--json` against a safe repository or use `--dry-run` for mutations.
+
+## Style
+
+- Prefer clear argparse surfaces and explicit error messages.
+- Keep API response parsing defensive; validate external JSON before indexing nested fields.
+- Keep docs examples copy-pasteable in PowerShell.
+- Avoid broad repo-template changes unless the task is explicitly about repository automation or packaging.
