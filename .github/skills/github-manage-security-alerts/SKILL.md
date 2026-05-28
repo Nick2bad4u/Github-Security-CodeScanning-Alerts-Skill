@@ -1,11 +1,9 @@
 ---
 name: "github-manage-security-alerts"
 description: "Use when a user asks to inspect, triage, bulk-fix, bulk-dismiss, dismiss, reopen, resolve, assign, summarize, export, or configure GitHub repository security alerts across repositories, including code scanning, Dependabot, Dependabot malware, and secret scanning; securely reads the GitHub token from environment variables such as GITHUB_TOKEN"
-argument-hint: "`repo` (optional, default `.`), optional `repository`, optional `token_env`, plus a command such as summary, export-alerts, bulk-update-alerts, repo-security-overview, list-code-scanning, show-code-scanning, update-code-scanning, list-dependabot, show-dependabot, update-dependabot, list-malware, show-malware, update-malware, list-secret-scanning, show-secret-scanning, update-secret-scanning, list-secret-locations, secret-scan-history, or api-call"
-compatibility: "Requires Python 3. Uses the GitHub REST API directly with a token supplied through an environment variable such as GITHUB_TOKEN or GH_TOKEN. Supports GitHub.com and standard GHES API base URL derivation from git remotes, with a raw API fallback for anything not wrapped yet."
-disable-model-invocation: false
-user-invocable: true
 license: "Unlicense"
+metadata:
+  short-description: "Inspect and triage GitHub security alerts"
 ---
 
 # GitHub Security Alerts Management
@@ -32,6 +30,18 @@ The bundled helper is repository-agnostic:
 - or pass `--repository owner/repo` explicitly
 - authenticate via environment variable instead of putting a token on the command line
 - optionally override the API base URL for custom environments
+
+## Compatibility
+
+Requires Python 3.
+Uses the GitHub REST API directly with a token supplied through an environment variable such as `GITHUB_TOKEN` or `GH_TOKEN`.
+Supports GitHub.com and standard GHES API base URL derivation from git remotes, with a raw API fallback for anything not wrapped yet.
+
+## Invocation hints
+
+Use `repo` when the target is a local checkout, defaulting to `.`.
+Use optional `repository` and `token_env` values when auto-detection is not enough.
+Common commands include `summary`, `export-alerts`, `bulk-update-alerts`, `repo-security-overview`, `list-code-scanning`, `show-code-scanning`, `update-code-scanning`, `list-dependabot`, `show-dependabot`, `update-dependabot`, `list-malware`, `show-malware`, `update-malware`, `list-secret-scanning`, `show-secret-scanning`, `update-secret-scanning`, `list-secret-locations`, `secret-scan-history`, and `api-call`.
 
 ## Security model
 

@@ -1,0 +1,7 @@
+interface:
+  display_name: "GitHub Manage Security Alerts"
+  short_description: "Inspect and triage GitHub security alerts"
+  icon_small: "./assets/github-manage-security-alerts-small.svg"
+  icon_large: "./assets/github-manage-security-alerts.png"
+  brand_color: "#24292F"
+  default_prompt: "Use $github-manage-security-alerts to inspect GitHub security alerts, summarize exposure, and apply safe triage actions."
