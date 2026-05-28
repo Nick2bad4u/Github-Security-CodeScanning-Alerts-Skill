@@ -21,8 +21,7 @@ function skillRelative(relativePath) {
 
 assert(skill?.name, "package.json must define codexSkill.name");
 assert(skill?.path, "package.json must define codexSkill.path");
-assert(pkg.name?.startsWith("@nick2bad4u/"), "package name must use the @nick2bad4u npm scope");
-assert(pkg.publishConfig?.access === "public", "scoped package must publish with public access");
+assert(pkg.name === "github-manage-security-alerts-skill", "package name must be github-manage-security-alerts-skill");
 assert(
   pkg.repository?.url === "git+https://github.com/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill.git",
   "repository.url must exactly match the GitHub repository for npm trusted publishing",

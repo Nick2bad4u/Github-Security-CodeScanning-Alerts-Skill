@@ -62,13 +62,13 @@ CHANGELOG.md
 
 ## Publishing
 
-The skill is packaged for GitHub releases and npm as `@nick2bad4u/github-manage-security-alerts`.
+The skill is packaged for GitHub releases and npm as `github-manage-security-alerts-skill`.
 
 For the first npm publish, publish locally once so the package exists:
 
 ```powershell
 npm run release:verify
-npm publish --access public
+npm publish
 ```
 
 Then configure npm trusted publishing for staged publishing:
@@ -81,7 +81,7 @@ Then configure npm trusted publishing for staged publishing:
 CLI equivalent:
 
 ```powershell
-npm trust github "@nick2bad4u/github-manage-security-alerts" --repo "Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill" --file "release-skill.yml" --allow-stage-publish
+npm trust github "github-manage-security-alerts-skill" --repo "Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill" --file "release-skill.yml" --allow-stage-publish
 ```
 
 After that, create releases from GitHub Actions by pushing a `vX.Y.Z` tag or running the `Release Skill Bundle` workflow manually with an explicit version. The workflow uses npm OIDC trusted publishing to stage the package and does not require an npm automation token.
@@ -89,7 +89,7 @@ After that, create releases from GitHub Actions by pushing a `vX.Y.Z` tag or run
 Approve the staged package after reviewing it:
 
 ```powershell
-npm stage list "@nick2bad4u/github-manage-security-alerts"
+npm stage list "github-manage-security-alerts-skill"
 npm stage approve "<stage-id>"
 ```
 
