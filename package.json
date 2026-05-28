@@ -1,7 +1,7 @@
 {
   "name": "@nick2bad4u/github-manage-security-alerts",
   "version": "1.0.0",
-  "private": true,
+  "private": false,
   "description": "Codex skill for inspecting and triaging GitHub security alerts.",
   "license": "Unlicense",
   "type": "module",
