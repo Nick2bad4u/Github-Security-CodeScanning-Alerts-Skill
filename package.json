@@ -1,0 +1,48 @@
+{
+  "name": "@nick2bad4u/github-manage-security-alerts",
+  "version": "1.0.0",
+  "description": "Codex skill for inspecting and triaging GitHub security alerts.",
+  "license": "Unlicense",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill/issues"
+  },
+  "homepage": "https://github.com/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill#readme",
+  "keywords": [
+    "agent-skill",
+    "code-scanning",
+    "codex",
+    "dependabot",
+    "github-security",
+    "openai",
+    "secret-scanning"
+  ],
+  "files": [
+    ".github/instructions/copilot-instructions.md",
+    ".github/skills/github-manage-security-alerts/",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "README.md",
+    "SECURITY.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=22.14"
+  },
+  "scripts": {
+    "validate": "node scripts/validate-skill-package.mjs",
+    "pack:dry-run": "npm pack --dry-run",
+    "release:verify": "npm run validate && npm run pack:dry-run"
+  },
+  "codexSkill": {
+    "name": "github-manage-security-alerts",
+    "path": ".github/skills/github-manage-security-alerts",
+    "githubReleaseAssetPrefix": "github-security-codescanning-alerts-skill"
+  }
+}
