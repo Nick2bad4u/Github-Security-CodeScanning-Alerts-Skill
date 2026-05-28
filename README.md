@@ -11,7 +11,7 @@ A Copilot / AI skill for inspecting and managing GitHub repository security aler
 
 This repository provides:
 
-- a reusable `github-manage-security-alerts` skill (`.github/skills/github-manage-security-alerts/SKILL.md`)
+- a reusable `github-manage-security-alerts` skill (`SKILL.md`)
 - a Python CLI helper to inspect and triage alerts
 - GitHub automation for release/security hygiene
 
@@ -39,17 +39,19 @@ With a GitHub token in an environment variable, you can:
 ## Repository layout
 
 ```text
-.github/
-	skills/
-		github-manage-security-alerts/
-			SKILL.md
-			scripts/
-				manage_github_security_alerts.py
-				github_security_api.py
-				github_security_cli.py
-				github_security_common.py
-				github_security_operations.py
-				github_security_render.py
+SKILL.md
+agents/
+  openai.yaml
+assets/
+  github-manage-security-alerts-small.svg
+  github-manage-security-alerts.png
+scripts/
+  manage_github_security_alerts.py
+  github_security_api.py
+  github_security_cli.py
+  github_security_common.py
+  github_security_operations.py
+  github_security_render.py
 README.md
 CONTRIBUTING.md
 SECURITY.md
@@ -66,7 +68,7 @@ For the first npm publish, publish locally once so the package exists:
 
 ```powershell
 npm run release:verify
-npm publish .\dist\npm --access public
+npm publish --access public
 ```
 
 Then configure npm trusted publishing for staged publishing:
@@ -119,13 +121,13 @@ export GITHUB_TOKEN="<your-token>"
 From repository root:
 
 ```powershell
-python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" summary --repo "."
+python "scripts/manage_github_security_alerts.py" summary --repo "."
 ```
 
 Machine-readable output:
 
 ```powershell
-python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" summary --repo "." --json
+python "scripts/manage_github_security_alerts.py" summary --repo "." --json
 ```
 
 ---
@@ -134,27 +136,27 @@ python ".github/skills/github-manage-security-alerts/scripts/manage_github_secur
 
 ```powershell
 # Export full alert sets for triage
-python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" export-alerts --repo "." --json
+python "scripts/manage_github_security_alerts.py" export-alerts --repo "." --json
 
 # List open high/error code scanning alerts
-python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" list-code-scanning --repo "." --state open --severity high,error
+python "scripts/manage_github_security_alerts.py" list-code-scanning --repo "." --state open --severity high,error
 
 # Dismiss a code scanning alert (dry-run first)
-python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" update-code-scanning --repo "." --alert 42 --state dismissed --dismissed-reason false_positive --comment "False positive after review." --dry-run
+python "scripts/manage_github_security_alerts.py" update-code-scanning --repo "." --alert 42 --state dismissed --dismissed-reason false_positive --comment "False positive after review." --dry-run
 
 # List open Dependabot alerts
-python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" list-dependabot --repo "." --state open
+python "scripts/manage_github_security_alerts.py" list-dependabot --repo "." --state open
 
 # List open secret scanning alerts
-python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" list-secret-scanning --repo "." --state open
+python "scripts/manage_github_security_alerts.py" list-secret-scanning --repo "." --state open
 
 # Bulk update (preview only)
-python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" bulk-update-alerts --repo "." --surface code-scanning --select-state open --target-state dismissed --dismissed-reason "false positive" --comment "Reviewed and intentionally dismissed." --limit 10 --dry-run --json
+python "scripts/manage_github_security_alerts.py" bulk-update-alerts --repo "." --surface code-scanning --select-state open --target-state dismissed --dismissed-reason "false positive" --comment "Reviewed and intentionally dismissed." --limit 10 --dry-run --json
 ```
 
 For the full command surface and workflows, see:
 
-- `.github/skills/github-manage-security-alerts/SKILL.md`
+- `SKILL.md`
 
 ---
 
