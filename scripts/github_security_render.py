@@ -9,48 +9,30 @@ from github_security_common import expect_dict
 def render_text(command: str, payload: Any) -> str:
     """Render command output as human-readable text."""
 
-    if command == "summary":
-        return render_summary(payload)
-    if command == "repo-security-overview":
-        return render_repo_security_overview(payload)
-    if command == "bulk-update-alerts":
-        return render_json_like(payload)
-    if command == "list-code-scanning":
-        return render_code_scanning_list(payload)
-    if command == "show-code-scanning":
-        return render_json_like(payload)
-    if command == "update-code-scanning":
-        return render_update_result(payload)
-    if command == "list-dependabot":
-        return render_dependabot_list(payload)
-    if command == "show-dependabot":
-        return render_json_like(payload)
-    if command == "update-dependabot":
-        return render_update_result(payload)
+    renderers = {
+        "summary": render_summary,
+        "repo-security-overview": render_repo_security_overview,
+        "bulk-update-alerts": render_json_like,
+        "list-code-scanning": render_code_scanning_list,
+        "show-code-scanning": render_json_like,
+        "update-code-scanning": render_update_result,
+        "list-dependabot": render_dependabot_list,
+        "show-dependabot": render_json_like,
+        "update-dependabot": render_update_result,
+        "show-malware": render_json_like,
+        "update-malware": render_update_result,
+        "list-secret-scanning": render_secret_scanning_list,
+        "show-secret-scanning": render_json_like,
+        "update-secret-scanning": render_update_result,
+        "list-secret-locations": render_secret_locations,
+        "secret-scan-history": render_json_like,
+        "export-alerts": render_json_like,
+        "api-call": render_json_like,
+    }
     if command == "list-malware":
-        return render_dependabot_list(
-            payload, heading="Dependabot malware alerts"
-        )
-    if command == "show-malware":
-        return render_json_like(payload)
-    if command == "update-malware":
-        return render_update_result(payload)
-    if command == "list-secret-scanning":
-        return render_secret_scanning_list(payload)
-    if command == "show-secret-scanning":
-        return render_json_like(payload)
-    if command == "update-secret-scanning":
-        return render_update_result(payload)
-    if command == "list-secret-locations":
-        return render_secret_locations(payload)
-    if command == "secret-scan-history":
-        return render_json_like(payload)
-    if command == "export-alerts":
-        return render_json_like(payload)
-    if command == "api-call":
-        return render_json_like(payload)
+        return render_dependabot_list(payload, heading="Dependabot malware alerts")
 
-    return render_json_like(payload)
+    return renderers.get(command, render_json_like)(payload)
 
 
 def emit_output(payload: Any, *, as_json: bool, command: str) -> None:
@@ -91,42 +73,54 @@ def render_summary(payload: dict[str, Any]) -> str:
         "malware",
         "secret_scanning",
     ):
-        section = payload["sections"][section_name]
-        pretty_name = section_name.replace("_", " ")
-        lines.append(f"- {pretty_name}:")
-        if not section.get("ok"):
-            error_payload = section.get("error", {})
-            lines.append(
-                "  status: unavailable "
-                f"({error_payload.get('status_code', 'n/a')}) "
-                f"{error_payload.get('message', 'unknown error')}"
-            )
-            continue
-
-        counts = section.get("counts_by_state", {})
-        lines.append(f"  total: {section.get('total', 0)}")
-        if counts:
-            lines.append(
-                "  counts: "
-                + ", ".join(
-                    f"{state}={count}"
-                    for state, count in sorted(counts.items())
-                )
-            )
-        samples = section.get("sample_alerts", [])
-        if samples:
-            lines.append("  samples:")
-            for alert in samples:
-                lines.append(
-                    f"    - {render_alert_brief(alert, section_name)}"
-                )
-        lookup_failures = section.get("lookup_failures")
-        if lookup_failures:
-            lines.append(
-                f"  malware-type lookup failures: {len(lookup_failures)}"
-            )
+        append_summary_section(lines, section_name, payload["sections"][section_name])
 
     return "\n".join(lines)
+
+
+def append_summary_section(
+    lines: list[str], section_name: str, section: dict[str, Any]
+) -> None:
+    lines.append(f"- {section_name.replace('_', ' ')}:")
+    if not section.get("ok"):
+        append_unavailable_section(lines, section)
+        return
+
+    lines.append(f"  total: {section.get('total', 0)}")
+    append_counts(lines, section.get("counts_by_state", {}))
+    append_sample_alerts(lines, section_name, section.get("sample_alerts", []))
+    lookup_failures = section.get("lookup_failures")
+    if lookup_failures:
+        lines.append(f"  malware-type lookup failures: {len(lookup_failures)}")
+
+
+def append_unavailable_section(lines: list[str], section: dict[str, Any]) -> None:
+    error_payload = section.get("error", {})
+    lines.append(
+        "  status: unavailable "
+        f"({error_payload.get('status_code', 'n/a')}) "
+        f"{error_payload.get('message', 'unknown error')}"
+    )
+
+
+def append_counts(lines: list[str], counts: Any) -> None:
+    if not counts:
+        return
+    lines.append(
+        "  counts: "
+        + ", ".join(f"{state}={count}" for state, count in sorted(counts.items()))
+    )
+
+
+def append_sample_alerts(
+    lines: list[str], section_name: str, samples: Any
+) -> None:
+    if not samples:
+        return
+
+    lines.append("  samples:")
+    for alert in samples:
+        lines.append(f"    - {render_alert_brief(alert, section_name)}")
 
 
 def render_repo_security_overview(payload: dict[str, Any]) -> str:
@@ -215,92 +209,90 @@ def render_alert_brief(alert: dict[str, Any], kind: str) -> str:
     html_url = alert.get("html_url")
 
     if kind == "code_scanning":
-        rule = (
-            expect_dict(alert.get("rule") or {}, "code scanning rule")
-            if alert.get("rule") is not None
-            else {}
-        )
-        instance = (
-            expect_dict(
-                alert.get("most_recent_instance") or {},
-                "code scanning instance",
-            )
-            if alert.get("most_recent_instance") is not None
-            else {}
-        )
-        location = (
-            expect_dict(
-                instance.get("location") or {}, "code scanning location"
-            )
-            if instance.get("location") is not None
-            else {}
-        )
-        severity = (
-            rule.get("security_severity_level")
-            or rule.get("severity")
-            or "unknown"
-        )
-        rule_name = rule.get("id") or rule.get("name") or "unknown-rule"
-        path = location.get("path") or "<unknown-path>"
-        return (
-            f"#{number} [{state}] severity={severity} rule={rule_name} "
-            f"path={path} url={html_url}"
-        )
+        return render_code_scanning_brief(alert, number, state, html_url)
 
     if kind in {"dependabot", "malware"}:
-        vulnerability = (
-            expect_dict(
-                alert.get("security_vulnerability") or {},
-                "Dependabot vulnerability",
-            )
-            if alert.get("security_vulnerability") is not None
-            else {}
-        )
-        package = (
-            expect_dict(
-                vulnerability.get("package") or {}, "Dependabot package"
-            )
-            if vulnerability.get("package") is not None
-            else {}
-        )
-        dependency = (
-            expect_dict(alert.get("dependency") or {}, "Dependabot dependency")
-            if alert.get("dependency") is not None
-            else {}
-        )
-        severity = (
-            vulnerability.get("severity") or alert.get("state") or "unknown"
-        )
-        if package.get("name") is not None:
-            package_name = package.get("name")
-        elif isinstance(dependency.get("package"), dict):
-            package_name = dependency["package"].get("name")
-        else:
-            package_name = None
-        manifest_path = dependency.get("manifest_path") or "<unknown-manifest>"
-        ghsa_id = (
-            alert.get("security_advisory", {}).get("ghsa_id")
-            if isinstance(alert.get("security_advisory"), dict)
-            else None
-        )
-        ghsa_id = ghsa_id or "unknown-ghsa"
-        malware_suffix = " malware" if kind == "malware" else ""
-        return (
-            f"#{number} [{state}] severity={severity} package={package_name} "
-            f"manifest={manifest_path} ghsa={ghsa_id}{malware_suffix} url={html_url}"
-        )
+        return render_dependabot_brief(alert, kind, number, state, html_url)
 
     if kind == "secret_scanning":
-        secret_type = alert.get("secret_type") or "unknown-secret-type"
-        resolution = alert.get("resolution") or "unresolved"
-        validity = alert.get("validity") or "unknown"
-        leaked = alert.get("publicly_leaked")
-        return (
-            f"#{number} [{state}] secret_type={secret_type} resolution={resolution} "
-            f"validity={validity} publicly_leaked={leaked} url={html_url}"
-        )
+        return render_secret_scanning_brief(alert, number, state, html_url)
 
     return f"#{number} [{state}] url={html_url}"
+
+
+def render_code_scanning_brief(
+    alert: dict[str, Any], number: Any, state: Any, html_url: Any
+) -> str:
+    rule = optional_dict(alert.get("rule"), "code scanning rule")
+    instance = optional_dict(
+        alert.get("most_recent_instance"), "code scanning instance"
+    )
+    location = optional_dict(instance.get("location"), "code scanning location")
+    severity = rule.get("security_severity_level") or rule.get("severity") or "unknown"
+    rule_name = rule.get("id") or rule.get("name") or "unknown-rule"
+    path = location.get("path") or "<unknown-path>"
+    return (
+        f"#{number} [{state}] severity={severity} rule={rule_name} "
+        f"path={path} url={html_url}"
+    )
+
+
+def render_dependabot_brief(
+    alert: dict[str, Any], kind: str, number: Any, state: Any, html_url: Any
+) -> str:
+    vulnerability = optional_dict(
+        alert.get("security_vulnerability"), "Dependabot vulnerability"
+    )
+    package = optional_dict(vulnerability.get("package"), "Dependabot package")
+    dependency = optional_dict(alert.get("dependency"), "Dependabot dependency")
+    severity = vulnerability.get("severity") or alert.get("state") or "unknown"
+    package_name = resolve_package_name(package, dependency)
+    manifest_path = dependency.get("manifest_path") or "<unknown-manifest>"
+    ghsa_id = resolve_ghsa_id(alert)
+    malware_suffix = " malware" if kind == "malware" else ""
+    return (
+        f"#{number} [{state}] severity={severity} package={package_name} "
+        f"manifest={manifest_path} ghsa={ghsa_id}{malware_suffix} url={html_url}"
+    )
+
+
+def render_secret_scanning_brief(
+    alert: dict[str, Any], number: Any, state: Any, html_url: Any
+) -> str:
+    secret_type = alert.get("secret_type") or "unknown-secret-type"
+    resolution = alert.get("resolution") or "unresolved"
+    validity = alert.get("validity") or "unknown"
+    leaked = alert.get("publicly_leaked")
+    return (
+        f"#{number} [{state}] secret_type={secret_type} resolution={resolution} "
+        f"validity={validity} publicly_leaked={leaked} url={html_url}"
+    )
+
+
+def optional_dict(value: Any, label: str) -> dict[str, Any]:
+    if value is None:
+        return {}
+    return expect_dict(value or {}, label)
+
+
+def resolve_package_name(
+    package: dict[str, Any], dependency: dict[str, Any]
+) -> Any:
+    if package.get("name") is not None:
+        return package.get("name")
+
+    dependency_package = dependency.get("package")
+    if isinstance(dependency_package, dict):
+        return dependency_package.get("name")
+
+    return None
+
+
+def resolve_ghsa_id(alert: dict[str, Any]) -> Any:
+    advisory = alert.get("security_advisory")
+    if isinstance(advisory, dict):
+        return advisory.get("ghsa_id") or "unknown-ghsa"
+    return "unknown-ghsa"
 
 
 def render_update_result(payload: dict[str, Any]) -> str:

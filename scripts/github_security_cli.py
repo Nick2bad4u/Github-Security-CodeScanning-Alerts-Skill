@@ -21,6 +21,19 @@ GLOBAL_VALUE_OPTIONS = {
     "--token-env",
     "--web-base-url",
 }
+HELP_ALERT_STATE_FILTER = "Alert state filter."
+HELP_ALERTS_PER_PAGE = "Number of alerts per page."
+HELP_ASSIGNEE_FILTER = "Assignee filter."
+HELP_ASSIGNEE_REPEAT = "Assignee login to apply. Repeat for multiple assignees."
+HELP_DESIRED_ALERT_STATE = "Desired alert state."
+HELP_DISMISSAL_COMMENT = "Optional dismissal comment."
+HELP_DISMISSAL_REASON = "Dismissal reason when state is dismissed."
+HELP_DRY_RUN = "Print the intended mutation without sending it."
+HELP_PAGE_NUMBER = "Page number."
+HELP_REMOVE_ASSIGNEES = "Remove all assignees."
+HELP_SECRET_ALERT_NUMBER = "Secret scanning alert number."
+HELP_SORT_DIRECTION = "Sort direction."
+HELP_SORT_FIELD = "Sort field."
 
 
 def parse_args() -> argparse.Namespace:
@@ -398,21 +411,21 @@ def add_code_scanning_common_filters(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--tool-guid", default=None, help="Filter by tool GUID."
     )
-    parser.add_argument("--state", default=None, help="Alert state filter.")
+    parser.add_argument("--state", default=None, help=HELP_ALERT_STATE_FILTER)
     parser.add_argument("--severity", default=None, help="Severity filter.")
-    parser.add_argument("--assignees", default=None, help="Assignee filter.")
+    parser.add_argument("--assignees", default=None, help=HELP_ASSIGNEE_FILTER)
     parser.add_argument("--ref", default=None, help="Git ref filter.")
     parser.add_argument(
         "--pr", type=int, default=None, help="Pull request number filter."
     )
-    parser.add_argument("--sort", default=None, help="Sort field.")
-    parser.add_argument("--direction", default=None, help="Sort direction.")
-    parser.add_argument("--page", type=int, default=1, help="Page number.")
+    parser.add_argument("--sort", default=None, help=HELP_SORT_FIELD)
+    parser.add_argument("--direction", default=None, help=HELP_SORT_DIRECTION)
+    parser.add_argument("--page", type=int, default=1, help=HELP_PAGE_NUMBER)
     parser.add_argument(
         "--per-page",
         type=int,
         default=DEFAULT_PAGE_SIZE,
-        help="Number of alerts per page.",
+        help=HELP_ALERTS_PER_PAGE,
     )
 
 
@@ -468,28 +481,28 @@ def add_code_scanning_update_parser(
         "--state",
         required=True,
         choices=("open", "dismissed"),
-        help="Desired alert state.",
+        help=HELP_DESIRED_ALERT_STATE,
     )
     parser.add_argument(
         "--dismissed-reason",
         default=None,
         choices=CODE_SCANNING_DISMISS_REASONS,
-        help="Dismissal reason when state is dismissed.",
+        help=HELP_DISMISSAL_REASON,
     )
     parser.add_argument(
-        "--comment", default=None, help="Optional dismissal comment."
+        "--comment", default=None, help=HELP_DISMISSAL_COMMENT
     )
     parser.add_argument(
         "--assignee",
         action="append",
         dest="assignees",
         default=None,
-        help="Assignee login to apply. Repeat for multiple assignees.",
+        help=HELP_ASSIGNEE_REPEAT,
     )
     parser.add_argument(
         "--clear-assignees",
         action="store_true",
-        help="Remove all assignees.",
+        help=HELP_REMOVE_ASSIGNEES,
     )
     parser.add_argument(
         "--create-request",
@@ -499,12 +512,12 @@ def add_code_scanning_update_parser(
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Print the intended mutation without sending it.",
+        help=HELP_DRY_RUN,
     )
 
 
 def add_dependabot_common_filters(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--state", default=None, help="Alert state filter.")
+    parser.add_argument("--state", default=None, help=HELP_ALERT_STATE_FILTER)
     parser.add_argument("--severity", default=None, help="Severity filter.")
     parser.add_argument("--ecosystem", default=None, help="Ecosystem filter.")
     parser.add_argument("--package", default=None, help="Package-name filter.")
@@ -518,12 +531,12 @@ def add_dependabot_common_filters(parser: argparse.ArgumentParser) -> None:
         default=None,
         help="Has filter, for example patch.",
     )
-    parser.add_argument("--assignee", default=None, help="Assignee filter.")
+    parser.add_argument("--assignee", default=None, help=HELP_ASSIGNEE_FILTER)
     parser.add_argument(
         "--scope", default=None, help="Dependency scope filter."
     )
-    parser.add_argument("--sort", default=None, help="Sort field.")
-    parser.add_argument("--direction", default=None, help="Sort direction.")
+    parser.add_argument("--sort", default=None, help=HELP_SORT_FIELD)
+    parser.add_argument("--direction", default=None, help=HELP_SORT_DIRECTION)
     parser.add_argument(
         "--before", default=None, help="Cursor for the previous page."
     )
@@ -534,7 +547,7 @@ def add_dependabot_common_filters(parser: argparse.ArgumentParser) -> None:
         "--per-page",
         type=int,
         default=DEFAULT_PAGE_SIZE,
-        help="Number of alerts per page.",
+        help=HELP_ALERTS_PER_PAGE,
     )
 
 
@@ -573,33 +586,33 @@ def add_dependabot_update_parser(
         "--state",
         required=True,
         choices=("open", "dismissed"),
-        help="Desired alert state.",
+        help=HELP_DESIRED_ALERT_STATE,
     )
     parser.add_argument(
         "--dismissed-reason",
         default=None,
         choices=DEPENDABOT_DISMISS_REASONS,
-        help="Dismissal reason when state is dismissed.",
+        help=HELP_DISMISSAL_REASON,
     )
     parser.add_argument(
-        "--comment", default=None, help="Optional dismissal comment."
+        "--comment", default=None, help=HELP_DISMISSAL_COMMENT
     )
     parser.add_argument(
         "--assignee",
         action="append",
         dest="assignees",
         default=None,
-        help="Assignee login to apply. Repeat for multiple assignees.",
+        help=HELP_ASSIGNEE_REPEAT,
     )
     parser.add_argument(
         "--clear-assignees",
         action="store_true",
-        help="Remove all assignees.",
+        help=HELP_REMOVE_ASSIGNEES,
     )
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Print the intended mutation without sending it.",
+        help=HELP_DRY_RUN,
     )
 
 
@@ -639,33 +652,33 @@ def add_malware_update_parser(
         "--state",
         required=True,
         choices=("open", "dismissed"),
-        help="Desired alert state.",
+        help=HELP_DESIRED_ALERT_STATE,
     )
     parser.add_argument(
         "--dismissed-reason",
         default=None,
         choices=DEPENDABOT_DISMISS_REASONS,
-        help="Dismissal reason when state is dismissed.",
+        help=HELP_DISMISSAL_REASON,
     )
     parser.add_argument(
-        "--comment", default=None, help="Optional dismissal comment."
+        "--comment", default=None, help=HELP_DISMISSAL_COMMENT
     )
     parser.add_argument(
         "--assignee",
         action="append",
         dest="assignees",
         default=None,
-        help="Assignee login to apply. Repeat for multiple assignees.",
+        help=HELP_ASSIGNEE_REPEAT,
     )
     parser.add_argument(
         "--clear-assignees",
         action="store_true",
-        help="Remove all assignees.",
+        help=HELP_REMOVE_ASSIGNEES,
     )
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Print the intended mutation without sending it.",
+        help=HELP_DRY_RUN,
     )
     parser.add_argument(
         "--skip-malware-check",
@@ -677,14 +690,14 @@ def add_malware_update_parser(
 def add_secret_scanning_common_filters(
     parser: argparse.ArgumentParser,
 ) -> None:
-    parser.add_argument("--state", default=None, help="Alert state filter.")
+    parser.add_argument("--state", default=None, help=HELP_ALERT_STATE_FILTER)
     parser.add_argument(
         "--secret-type", default=None, help="Secret type filter."
     )
     parser.add_argument(
         "--resolution", default=None, help="Resolution filter."
     )
-    parser.add_argument("--assignee", default=None, help="Assignee filter.")
+    parser.add_argument("--assignee", default=None, help=HELP_ASSIGNEE_FILTER)
     parser.add_argument("--validity", default=None, help="Validity filter.")
     parser.add_argument(
         "--is-publicly-leaked",
@@ -696,14 +709,14 @@ def add_secret_scanning_common_filters(
         action="store_true",
         help="Filter to multi-repo alerts.",
     )
-    parser.add_argument("--sort", default=None, help="Sort field.")
-    parser.add_argument("--direction", default=None, help="Sort direction.")
-    parser.add_argument("--page", type=int, default=1, help="Page number.")
+    parser.add_argument("--sort", default=None, help=HELP_SORT_FIELD)
+    parser.add_argument("--direction", default=None, help=HELP_SORT_DIRECTION)
+    parser.add_argument("--page", type=int, default=1, help=HELP_PAGE_NUMBER)
     parser.add_argument(
         "--per-page",
         type=int,
         default=DEFAULT_PAGE_SIZE,
-        help="Number of alerts per page.",
+        help=HELP_ALERTS_PER_PAGE,
     )
     parser.add_argument(
         "--show-secret-values",
@@ -732,7 +745,7 @@ def add_secret_scanning_show_parser(
         "--alert",
         required=True,
         type=int,
-        help="Secret scanning alert number.",
+        help=HELP_SECRET_ALERT_NUMBER,
     )
     parser.add_argument(
         "--show-secret-values",
@@ -752,13 +765,13 @@ def add_secret_scanning_update_parser(
         "--alert",
         required=True,
         type=int,
-        help="Secret scanning alert number.",
+        help=HELP_SECRET_ALERT_NUMBER,
     )
     parser.add_argument(
         "--state",
         required=True,
         choices=("open", "resolved"),
-        help="Desired alert state.",
+        help=HELP_DESIRED_ALERT_STATE,
     )
     parser.add_argument(
         "--resolution",
@@ -782,7 +795,7 @@ def add_secret_scanning_update_parser(
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Print the intended mutation without sending it.",
+        help=HELP_DRY_RUN,
     )
 
 
@@ -797,9 +810,9 @@ def add_secret_locations_parser(
         "--alert",
         required=True,
         type=int,
-        help="Secret scanning alert number.",
+        help=HELP_SECRET_ALERT_NUMBER,
     )
-    parser.add_argument("--page", type=int, default=1, help="Page number.")
+    parser.add_argument("--page", type=int, default=1, help=HELP_PAGE_NUMBER)
     parser.add_argument(
         "--per-page",
         type=int,

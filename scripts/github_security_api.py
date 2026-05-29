@@ -102,7 +102,7 @@ def parse_repository_input(repository: str) -> tuple[str, str, str, str]:
         )
 
     remote_match = re.fullmatch(
-        r"git@(?P<host>[^:]+):(?P<owner>[^/]+)/(?P<repo>[^/]+?)(?:\.git)?",
+        r"git@(?P<host>[^:]+):(?P<owner>[^/]+)/(?P<repo>[^/]+)(?:\.git)?",
         repository,
     )
     if remote_match:
@@ -264,9 +264,11 @@ def api_request(
         "X-GitHub-Api-Version": DEFAULT_API_VERSION,
     }
 
+    json_content_type = "application/json"
+
     if body is not None:
         request_body = json.dumps(body).encode("utf-8")
-        headers["Content-Type"] = "application/json"
+        headers["Content-Type"] = json_content_type
 
     http_request = request.Request(
         url,
@@ -285,7 +287,7 @@ def api_request(
             if not raw_body:
                 parsed_body: Any = None
             elif (
-                "application/json" in content_type or accept == DEFAULT_ACCEPT
+                json_content_type in content_type or accept == DEFAULT_ACCEPT
             ):
                 parsed_body = json.loads(raw_body.decode("utf-8"))
             else:
@@ -301,7 +303,7 @@ def api_request(
         raw_error_body = exc.read()
         content_type = exc.headers.get("Content-Type", "")
         if raw_error_body:
-            if "application/json" in content_type:
+            if json_content_type in content_type:
                 response_data = json.loads(raw_error_body.decode("utf-8"))
             else:
                 response_data = raw_error_body.decode("utf-8")

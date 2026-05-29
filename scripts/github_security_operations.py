@@ -15,6 +15,8 @@ from github_security_common import (
     parse_name_value_pairs,
 )
 
+DEPENDABOT_ALERTS_LABEL = "Dependabot alerts"
+
 
 def build_code_scanning_query(arguments: Any) -> dict[str, Any]:
     """Build query parameters for code scanning list calls."""
@@ -212,7 +214,7 @@ def fetch_dependabot_alerts(
         endpoint=f"/repos/{context.owner}/{context.repo}/dependabot/alerts",
         params=query,
     )
-    return expect_list(response.data, "Dependabot alerts")
+    return expect_list(response.data, DEPENDABOT_ALERTS_LABEL)
 
 
 def fetch_dependabot_alert(
@@ -340,31 +342,41 @@ def classify_malware_alerts(
     cache = advisory_cache if advisory_cache is not None else {}
 
     for alert in alerts:
-        ghsa_id = get_alert_ghsa_id(alert)
-        if ghsa_id is None:
+        classified = classify_one_malware_alert(context, alert, cache)
+        if classified is None:
             continue
-
-        advisory = fetch_global_advisory_type(context, ghsa_id, cache)
-        if advisory is None:
-            continue
-        if "error" in advisory:
-            lookup_failures.append(
-                {
-                    "alert_number": alert.get("number"),
-                    "ghsa_id": ghsa_id,
-                    "error": advisory["error"],
-                }
-            )
-            continue
-
-        if advisory.get("type") != "malware":
-            continue
-
-        malware_alert = dict(alert)
-        malware_alert["malware_advisory"] = advisory
-        malware_alerts.append(malware_alert)
+        if "error" in classified:
+            lookup_failures.append(classified)
+        else:
+            malware_alerts.append(classified)
 
     return malware_alerts, lookup_failures
+
+
+def classify_one_malware_alert(
+    context: RepoContext,
+    alert: dict[str, Any],
+    advisory_cache: dict[str, dict[str, Any] | None],
+) -> dict[str, Any] | None:
+    ghsa_id = get_alert_ghsa_id(alert)
+    if ghsa_id is None:
+        return None
+
+    advisory = fetch_global_advisory_type(context, ghsa_id, advisory_cache)
+    if advisory is None:
+        return None
+    if "error" in advisory:
+        return {
+            "alert_number": alert.get("number"),
+            "ghsa_id": ghsa_id,
+            "error": advisory["error"],
+        }
+    if advisory.get("type") != "malware":
+        return None
+
+    malware_alert = dict(alert)
+    malware_alert["malware_advisory"] = advisory
+    return malware_alert
 
 
 def maybe_raise_if_not_malware(
@@ -609,7 +621,7 @@ def build_summary(context: RepoContext, arguments: Any) -> dict[str, Any]:
 
     if dependabot_result["ok"]:
         dependabot_alerts = expect_list(
-            dependabot_result["data"], "Dependabot alerts"
+            dependabot_result["data"], DEPENDABOT_ALERTS_LABEL
         )
         malware_alerts, lookup_failures = classify_malware_alerts(
             context,
@@ -689,7 +701,7 @@ def build_export_alerts(
     if dependabot_result["ok"]:
         advisories_cache: dict[str, dict[str, Any] | None] = {}
         dependabot_alerts = expect_list(
-            dependabot_result["data"], "Dependabot alerts"
+            dependabot_result["data"], DEPENDABOT_ALERTS_LABEL
         )
         malware_alerts, lookup_failures = classify_malware_alerts(
             context,
@@ -905,40 +917,73 @@ def select_bulk_alerts(
     lookup_failures: list[dict[str, Any]] = []
 
     if arguments.alerts:
-        selected_alerts: list[dict[str, Any]] = []
-        for alert_number in arguments.alerts:
-            if surface == "code-scanning":
-                selected_alerts.append(
-                    fetch_code_scanning_alert(context, alert_number)
-                )
-                continue
-            if surface == "dependabot":
-                selected_alerts.append(
-                    fetch_dependabot_alert(context, alert_number)
-                )
-                continue
-            if surface == "malware":
-                if arguments.skip_malware_check:
-                    selected_alerts.append(
-                        fetch_dependabot_alert(context, alert_number)
-                    )
-                else:
-                    selected_alerts.append(
-                        maybe_raise_if_not_malware(
-                            context, alert_number, advisory_cache
-                        )
-                    )
-                continue
-            selected_alerts.append(
-                fetch_secret_scanning_alert(
-                    context,
-                    alert_number=alert_number,
-                    show_secret_values=arguments.show_secret_values,
-                )
-            )
-        return selected_alerts, lookup_failures
+        return (
+            fetch_selected_bulk_alerts(
+                context=context,
+                arguments=arguments,
+                advisory_cache=advisory_cache,
+            ),
+            lookup_failures,
+        )
 
-    if surface == "code-scanning":
+    fetched_alerts, lookup_failures = fetch_bulk_alerts_by_surface(
+        context=context,
+        arguments=arguments,
+        advisory_cache=advisory_cache,
+        lookup_failures=lookup_failures,
+    )
+    return fetched_alerts, lookup_failures
+
+
+def fetch_selected_bulk_alerts(
+    *,
+    context: RepoContext,
+    arguments: Any,
+    advisory_cache: dict[str, dict[str, Any] | None],
+) -> list[dict[str, Any]]:
+    selected_alerts: list[dict[str, Any]] = []
+    for alert_number in arguments.alerts:
+        selected_alerts.append(
+            fetch_one_bulk_alert(
+                context=context,
+                arguments=arguments,
+                advisory_cache=advisory_cache,
+                alert_number=alert_number,
+            )
+        )
+    return selected_alerts
+
+
+def fetch_one_bulk_alert(
+    *,
+    context: RepoContext,
+    arguments: Any,
+    advisory_cache: dict[str, dict[str, Any] | None],
+    alert_number: int,
+) -> dict[str, Any]:
+    if arguments.surface == "code-scanning":
+        return fetch_code_scanning_alert(context, alert_number)
+    if arguments.surface == "dependabot":
+        return fetch_dependabot_alert(context, alert_number)
+    if arguments.surface == "malware" and arguments.skip_malware_check:
+        return fetch_dependabot_alert(context, alert_number)
+    if arguments.surface == "malware":
+        return maybe_raise_if_not_malware(context, alert_number, advisory_cache)
+    return fetch_secret_scanning_alert(
+        context,
+        alert_number=alert_number,
+        show_secret_values=arguments.show_secret_values,
+    )
+
+
+def fetch_bulk_alerts_by_surface(
+    *,
+    context: RepoContext,
+    arguments: Any,
+    advisory_cache: dict[str, dict[str, Any] | None],
+    lookup_failures: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    if arguments.surface == "code-scanning":
         return (
             fetch_code_scanning_alerts(
                 context, build_bulk_code_scanning_query(arguments)
@@ -946,7 +991,7 @@ def select_bulk_alerts(
             lookup_failures,
         )
 
-    if surface == "dependabot":
+    if arguments.surface == "dependabot":
         return (
             fetch_dependabot_alerts(
                 context, build_bulk_dependabot_query(arguments)
@@ -954,7 +999,7 @@ def select_bulk_alerts(
             lookup_failures,
         )
 
-    if surface == "malware":
+    if arguments.surface == "malware":
         dependabot_alerts = fetch_dependabot_alerts(
             context, build_bulk_dependabot_query(arguments)
         )
@@ -1013,13 +1058,9 @@ def bulk_update_alerts(context: RepoContext, arguments: Any) -> dict[str, Any]:
                 arguments=arguments,
                 surface=arguments.surface,
             )
-            if arguments.surface == "code-scanning":
-                result = update_code_scanning_alert(context, update_args)
-            elif arguments.surface in {"dependabot", "malware"}:
-                result = update_dependabot_alert(context, update_args)
-            else:
-                result = update_secret_scanning_alert(context, update_args)
-            successes.append(result)
+            successes.append(
+                apply_bulk_update(context, arguments.surface, update_args)
+            )
         except GitHubSecurityCliError as exc:
             failures.append(
                 {
@@ -1040,97 +1081,80 @@ def bulk_update_alerts(context: RepoContext, arguments: Any) -> dict[str, Any]:
     }
 
 
+def apply_bulk_update(
+    context: RepoContext, surface: str, update_args: Any
+) -> dict[str, Any]:
+    if surface == "code-scanning":
+        return update_code_scanning_alert(context, update_args)
+    if surface in {"dependabot", "malware"}:
+        return update_dependabot_alert(context, update_args)
+    return update_secret_scanning_alert(context, update_args)
+
+
 def handle_command(context: RepoContext, arguments: Any) -> Any:
     """Dispatch the parsed command."""
 
-    command = arguments.command
-
-    if command == "summary":
+    if arguments.command == "summary":
         return build_summary(context, arguments)
 
-    if command == "repo-security-overview":
+    if arguments.command == "repo-security-overview":
         return fetch_repository_overview(context)
 
-    if command == "export-alerts":
+    if arguments.command == "export-alerts":
         return build_export_alerts(context, arguments)
 
-    if command == "bulk-update-alerts":
+    if arguments.command == "bulk-update-alerts":
         return bulk_update_alerts(context, arguments)
 
-    if command == "list-code-scanning":
+    if arguments.command == "list-code-scanning":
         return fetch_code_scanning_alerts(
             context, build_code_scanning_query(arguments)
         )
 
-    if command == "show-code-scanning":
-        alert = fetch_code_scanning_alert(context, arguments.alert)
-        if arguments.include_instances:
-            alert["instances"] = fetch_code_scanning_instances(
-                context,
-                arguments.alert,
-                page=1,
-                per_page=arguments.instances_per_page,
-            )
-        if arguments.include_autofix:
-            alert["autofix"] = fetch_code_scanning_autofix(
-                context, arguments.alert
-            )
-        return alert
+    if arguments.command == "show-code-scanning":
+        return show_code_scanning_alert(context, arguments)
 
-    if command == "update-code-scanning":
+    if arguments.command == "update-code-scanning":
         return update_code_scanning_alert(context, arguments)
 
-    if command == "list-dependabot":
+    if arguments.command == "list-dependabot":
         return fetch_dependabot_alerts(
             context, build_dependabot_query(arguments)
         )
 
-    if command == "show-dependabot":
+    if arguments.command == "show-dependabot":
         return fetch_dependabot_alert(context, arguments.alert)
 
-    if command == "update-dependabot":
+    if arguments.command == "update-dependabot":
         return update_dependabot_alert(context, arguments)
 
-    if command == "list-malware":
-        advisories_cache: dict[str, dict[str, Any] | None] = {}
-        alerts = fetch_dependabot_alerts(
-            context, build_dependabot_query(arguments)
-        )
-        malware_alerts, lookup_failures = classify_malware_alerts(
-            context,
-            alerts,
-            advisories_cache,
-        )
-        return {
-            "alerts": malware_alerts,
-            "lookup_failures": lookup_failures,
-            "total": len(malware_alerts),
-        }
+    if arguments.command == "list-malware":
+        return list_malware_alerts(context, arguments)
 
-    if command == "show-malware":
+    if arguments.command == "show-malware":
         return maybe_raise_if_not_malware(context, arguments.alert, {})
 
-    if command == "update-malware":
+    if arguments.command == "update-malware":
         if not arguments.skip_malware_check:
             maybe_raise_if_not_malware(context, arguments.alert, {})
         return update_dependabot_alert(context, arguments)
 
-    if command == "list-secret-scanning":
+    if arguments.command == "list-secret-scanning":
         return fetch_secret_scanning_alerts(
             context, build_secret_scanning_query(arguments)
         )
 
-    if command == "show-secret-scanning":
+    if arguments.command == "show-secret-scanning":
         return fetch_secret_scanning_alert(
             context,
             alert_number=arguments.alert,
             show_secret_values=arguments.show_secret_values,
         )
 
-    if command == "update-secret-scanning":
+    if arguments.command == "update-secret-scanning":
         return update_secret_scanning_alert(context, arguments)
 
-    if command == "list-secret-locations":
+    if arguments.command == "list-secret-locations":
         return fetch_secret_locations(
             context,
             alert_number=arguments.alert,
@@ -1138,25 +1162,49 @@ def handle_command(context: RepoContext, arguments: Any) -> Any:
             per_page=arguments.per_page,
         )
 
-    if command == "secret-scan-history":
+    if arguments.command == "secret-scan-history":
         return fetch_secret_scan_history(context)
 
-    if command == "api-call":
-        response = api_request(
-            context,
-            endpoint=arguments.endpoint,
-            method=arguments.method,
-            params=parse_name_value_pairs(arguments.query_params),
-            body=(
-                None
-                if arguments.body_json is None
-                else json.loads(arguments.body_json)
-            ),
-        )
-        return {
-            "data": response.data,
-            "status_code": response.status_code,
-            "url": response.url,
-        }
+    if arguments.command == "api-call":
+        return run_api_call(context, arguments)
 
-    raise GitHubSecurityCliError(f"Unsupported command '{command}'.")
+    raise GitHubSecurityCliError(f"Unsupported command '{arguments.command}'.")
+
+
+def show_code_scanning_alert(context: RepoContext, arguments: Any) -> dict[str, Any]:
+    alert = fetch_code_scanning_alert(context, arguments.alert)
+    if arguments.include_instances:
+        alert["instances"] = fetch_code_scanning_instances(
+            context,
+            arguments.alert,
+            page=1,
+            per_page=arguments.instances_per_page,
+        )
+    if arguments.include_autofix:
+        alert["autofix"] = fetch_code_scanning_autofix(context, arguments.alert)
+    return alert
+
+
+def list_malware_alerts(context: RepoContext, arguments: Any) -> dict[str, Any]:
+    alerts = fetch_dependabot_alerts(context, build_dependabot_query(arguments))
+    malware_alerts, lookup_failures = classify_malware_alerts(context, alerts, {})
+    return {
+        "alerts": malware_alerts,
+        "lookup_failures": lookup_failures,
+        "total": len(malware_alerts),
+    }
+
+
+def run_api_call(context: RepoContext, arguments: Any) -> dict[str, Any]:
+    response = api_request(
+        context,
+        endpoint=arguments.endpoint,
+        method=arguments.method,
+        params=parse_name_value_pairs(arguments.query_params),
+        body=None if arguments.body_json is None else json.loads(arguments.body_json),
+    )
+    return {
+        "data": response.data,
+        "status_code": response.status_code,
+        "url": response.url,
+    }

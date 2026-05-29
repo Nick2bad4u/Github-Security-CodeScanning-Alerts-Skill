@@ -15,7 +15,7 @@ if str(SCRIPT_DIR) not in sys.path:
 def main() -> int:
     """CLI entry point."""
 
-    from github_security_api import GitHubApiError, resolve_context
+    from github_security_api import resolve_context
     from github_security_cli import parse_args
     from github_security_common import GitHubSecurityCliError
     from github_security_operations import handle_command
@@ -28,7 +28,6 @@ def main() -> int:
         payload = handle_command(context, arguments)
         emit_output(payload, as_json=arguments.json, command=arguments.command)
     except (
-        GitHubApiError,
         GitHubSecurityCliError,
         json.JSONDecodeError,
     ) as exc:
