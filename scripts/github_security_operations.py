@@ -311,23 +311,39 @@ def get_alert_ghsa_id(alert: dict[str, Any]) -> str | None:
     """Extract a GHSA identifier from a Dependabot alert payload."""
 
     advisory = alert.get("security_advisory")
-    if isinstance(advisory, dict):
-        ghsa_id = advisory.get("ghsa_id")
-        if isinstance(ghsa_id, str) and ghsa_id.strip():
-            return ghsa_id.strip()
+    if not isinstance(advisory, dict):
+        return None
 
-        identifiers = advisory.get("identifiers")
-        if isinstance(identifiers, list):
-            for identifier in identifiers:
-                if not isinstance(identifier, dict):
-                    continue
-                if identifier.get("type") != "GHSA":
-                    continue
-                value = identifier.get("value")
-                if isinstance(value, str) and value.strip():
-                    return value.strip()
+    direct_ghsa_id = non_empty_string(advisory.get("ghsa_id"))
+    if direct_ghsa_id is not None:
+        return direct_ghsa_id
 
+    return ghsa_id_from_identifiers(advisory.get("identifiers"))
+
+
+def non_empty_string(value: Any) -> str | None:
+    if isinstance(value, str) and value.strip():
+        return value.strip()
     return None
+
+
+def ghsa_id_from_identifiers(identifiers: Any) -> str | None:
+    if not isinstance(identifiers, list):
+        return None
+
+    for identifier in identifiers:
+        ghsa_id = ghsa_id_from_identifier(identifier)
+        if ghsa_id is not None:
+            return ghsa_id
+    return None
+
+
+def ghsa_id_from_identifier(identifier: Any) -> str | None:
+    if not isinstance(identifier, dict):
+        return None
+    if identifier.get("type") != "GHSA":
+        return None
+    return non_empty_string(identifier.get("value"))
 
 
 def classify_malware_alerts(
@@ -912,7 +928,6 @@ def select_bulk_alerts(
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Resolve the alerts targeted by a bulk-update command."""
 
-    surface = arguments.surface
     advisory_cache: dict[str, dict[str, Any] | None] = {}
     lookup_failures: list[dict[str, Any]] = []
 
@@ -1094,81 +1109,102 @@ def apply_bulk_update(
 def handle_command(context: RepoContext, arguments: Any) -> Any:
     """Dispatch the parsed command."""
 
-    if arguments.command == "summary":
-        return build_summary(context, arguments)
+    handlers = {
+        "summary": build_summary,
+        "repo-security-overview": command_repo_security_overview,
+        "export-alerts": build_export_alerts,
+        "bulk-update-alerts": bulk_update_alerts,
+        "list-code-scanning": command_list_code_scanning,
+        "show-code-scanning": show_code_scanning_alert,
+        "update-code-scanning": update_code_scanning_alert,
+        "list-dependabot": command_list_dependabot,
+        "show-dependabot": command_show_dependabot,
+        "update-dependabot": update_dependabot_alert,
+        "list-malware": list_malware_alerts,
+        "show-malware": command_show_malware,
+        "update-malware": command_update_malware,
+        "list-secret-scanning": command_list_secret_scanning,
+        "show-secret-scanning": command_show_secret_scanning,
+        "update-secret-scanning": update_secret_scanning_alert,
+        "list-secret-locations": command_list_secret_locations,
+        "secret-scan-history": command_secret_scan_history,
+        "api-call": run_api_call,
+    }
+    try:
+        return handlers[arguments.command](context, arguments)
+    except KeyError as error:
+        raise GitHubSecurityCliError(
+            f"Unsupported command '{arguments.command}'."
+        ) from error
 
-    if arguments.command == "repo-security-overview":
-        return fetch_repository_overview(context)
 
-    if arguments.command == "export-alerts":
-        return build_export_alerts(context, arguments)
+def command_repo_security_overview(
+    context: RepoContext, _arguments: Any
+) -> dict[str, Any]:
+    return fetch_repository_overview(context)
 
-    if arguments.command == "bulk-update-alerts":
-        return bulk_update_alerts(context, arguments)
 
-    if arguments.command == "list-code-scanning":
-        return fetch_code_scanning_alerts(
-            context, build_code_scanning_query(arguments)
-        )
+def command_list_code_scanning(
+    context: RepoContext, arguments: Any
+) -> list[dict[str, Any]]:
+    return fetch_code_scanning_alerts(context, build_code_scanning_query(arguments))
 
-    if arguments.command == "show-code-scanning":
-        return show_code_scanning_alert(context, arguments)
 
-    if arguments.command == "update-code-scanning":
-        return update_code_scanning_alert(context, arguments)
+def command_list_dependabot(
+    context: RepoContext, arguments: Any
+) -> list[dict[str, Any]]:
+    return fetch_dependabot_alerts(context, build_dependabot_query(arguments))
 
-    if arguments.command == "list-dependabot":
-        return fetch_dependabot_alerts(
-            context, build_dependabot_query(arguments)
-        )
 
-    if arguments.command == "show-dependabot":
-        return fetch_dependabot_alert(context, arguments.alert)
+def command_show_dependabot(
+    context: RepoContext, arguments: Any
+) -> dict[str, Any]:
+    return fetch_dependabot_alert(context, arguments.alert)
 
-    if arguments.command == "update-dependabot":
-        return update_dependabot_alert(context, arguments)
 
-    if arguments.command == "list-malware":
-        return list_malware_alerts(context, arguments)
+def command_show_malware(context: RepoContext, arguments: Any) -> dict[str, Any]:
+    return maybe_raise_if_not_malware(context, arguments.alert, {})
 
-    if arguments.command == "show-malware":
-        return maybe_raise_if_not_malware(context, arguments.alert, {})
 
-    if arguments.command == "update-malware":
-        if not arguments.skip_malware_check:
-            maybe_raise_if_not_malware(context, arguments.alert, {})
-        return update_dependabot_alert(context, arguments)
+def command_update_malware(context: RepoContext, arguments: Any) -> dict[str, Any]:
+    if not arguments.skip_malware_check:
+        maybe_raise_if_not_malware(context, arguments.alert, {})
+    return update_dependabot_alert(context, arguments)
 
-    if arguments.command == "list-secret-scanning":
-        return fetch_secret_scanning_alerts(
-            context, build_secret_scanning_query(arguments)
-        )
 
-    if arguments.command == "show-secret-scanning":
-        return fetch_secret_scanning_alert(
-            context,
-            alert_number=arguments.alert,
-            show_secret_values=arguments.show_secret_values,
-        )
+def command_list_secret_scanning(
+    context: RepoContext, arguments: Any
+) -> list[dict[str, Any]]:
+    return fetch_secret_scanning_alerts(
+        context, build_secret_scanning_query(arguments)
+    )
 
-    if arguments.command == "update-secret-scanning":
-        return update_secret_scanning_alert(context, arguments)
 
-    if arguments.command == "list-secret-locations":
-        return fetch_secret_locations(
-            context,
-            alert_number=arguments.alert,
-            page=arguments.page,
-            per_page=arguments.per_page,
-        )
+def command_show_secret_scanning(
+    context: RepoContext, arguments: Any
+) -> dict[str, Any]:
+    return fetch_secret_scanning_alert(
+        context,
+        alert_number=arguments.alert,
+        show_secret_values=arguments.show_secret_values,
+    )
 
-    if arguments.command == "secret-scan-history":
-        return fetch_secret_scan_history(context)
 
-    if arguments.command == "api-call":
-        return run_api_call(context, arguments)
+def command_list_secret_locations(
+    context: RepoContext, arguments: Any
+) -> list[dict[str, Any]]:
+    return fetch_secret_locations(
+        context,
+        alert_number=arguments.alert,
+        page=arguments.page,
+        per_page=arguments.per_page,
+    )
 
-    raise GitHubSecurityCliError(f"Unsupported command '{arguments.command}'.")
+
+def command_secret_scan_history(
+    context: RepoContext, _arguments: Any
+) -> dict[str, Any]:
+    return fetch_secret_scan_history(context)
 
 
 def show_code_scanning_alert(context: RepoContext, arguments: Any) -> dict[str, Any]:
