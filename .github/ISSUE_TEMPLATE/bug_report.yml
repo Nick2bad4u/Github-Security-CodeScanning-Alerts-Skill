@@ -36,7 +36,7 @@ body:
       description: Include exact commands where possible.
       placeholder: |
         1. Set GITHUB_TOKEN ...
-        2. Run `python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" summary --repo "."`
+        2. Run `python "scripts/manage_github_security_alerts.py" summary --repo "."`
         3. Observe ...
     validations:
       required: true

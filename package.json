@@ -15,12 +15,21 @@
   "homepage": "https://github.com/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill#readme",
   "keywords": [
     "agent-skill",
+    "agent-skills",
+    "ai-agent",
+    "claude-code",
     "code-scanning",
     "codex",
+    "cursor",
     "dependabot",
+    "gemini-cli",
     "github-security",
+    "github-copilot",
     "openai",
-    "secret-scanning"
+    "opencode",
+    "secret-scanning",
+    "universal",
+    "zed"
   ],
   "files": [
     "SKILL.md",

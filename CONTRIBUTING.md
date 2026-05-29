@@ -22,8 +22,8 @@ python -m venv .venv
 From repo root, run:
 
 ```powershell
-python -m compileall ".github/skills/github-manage-security-alerts/scripts"
-python ".github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" --help
+python -m compileall "scripts"
+python "scripts/manage_github_security_alerts.py" --help
 ```
 
 If you touched command behavior, include example command invocations and expected output snippets in your PR description.

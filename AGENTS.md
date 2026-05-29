@@ -6,13 +6,13 @@ applyTo: "**"
 
 # GitHub Security Alerts Skill Guidance
 
-This repository packages the `github-manage-security-alerts` Codex skill. Keep changes focused on the skill payload under `.github/skills/github-manage-security-alerts/` and the small repository automation needed to publish it.
+This repository packages the `github-manage-security-alerts` Codex/open-agent skill. Keep changes focused on the root skill payload and the small repository automation needed to publish it.
 
 ## Scope
 
-- Treat `.github/skills/github-manage-security-alerts/SKILL.md` as the user-facing skill entrypoint.
-- Treat `.github/skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py` as the CLI entrypoint.
-- Keep helper modules in `.github/skills/github-manage-security-alerts/scripts/` stdlib-only unless a dependency is explicitly justified and documented.
+- Treat `SKILL.md` as the user-facing skill entrypoint.
+- Treat `scripts/manage_github_security_alerts.py` as the CLI entrypoint.
+- Keep helper modules in `scripts/` stdlib-only unless a dependency is explicitly justified and documented.
 - Keep `agents/openai.yaml`, `assets/`, and `LICENSE.txt` synchronized with the packaged skill.
 
 ## Security
@@ -27,8 +27,8 @@ This repository packages the `github-manage-security-alerts` Codex skill. Keep c
 Run the narrowest useful checks after edits:
 
 ```powershell
-python -m compileall .github/skills/github-manage-security-alerts/scripts
-python C:/Users/Nick/.codex/skills/.system/skill-creator/scripts/quick_validate.py .github/skills/github-manage-security-alerts
+python -m compileall scripts
+npm run release:verify
 ```
 
 For behavior changes, also run the relevant CLI command with `--json` against a safe repository or use `--dry-run` for mutations.
