@@ -1,60 +1,85 @@
 {
-  "name": "github-manage-security-alerts-skill",
-  "version": "1.0.0",
-  "private": false,
-  "description": "Codex skill for inspecting and triaging GitHub security alerts.",
-  "license": "Unlicense",
-  "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill.git"
-  },
-  "bugs": {
-    "url": "https://github.com/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill/issues"
-  },
-  "homepage": "https://github.com/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill#readme",
-  "keywords": [
-    "agent-skill",
-    "agent-skills",
-    "ai-agent",
-    "claude-code",
-    "code-scanning",
-    "codex",
-    "cursor",
-    "dependabot",
-    "gemini-cli",
-    "github-security",
-    "github-copilot",
-    "openai",
-    "opencode",
-    "secret-scanning",
-    "universal",
-    "zed"
-  ],
-  "files": [
-    "SKILL.md",
-    "LICENSE.txt",
-    "agents/",
-    "assets/",
-    "scripts/",
-    "CHANGELOG.md",
-    "CONTRIBUTING.md",
-    "README.md",
-    "SECURITY.md"
-  ],
-  "engines": {
-    "node": ">=22.14"
-  },
-  "scripts": {
-    "validate": "node tools/validate-skill-package.mjs",
-    "pack:dry-run": "npm pack --dry-run",
-    "publish:local": "npm run release:verify && npm publish --access public",
-    "release:verify": "npm run validate && npm run pack:dry-run",
-    "update-actions": "npx actions-up --yes --style sha"
-  },
-  "codexSkill": {
-    "name": "github-manage-security-alerts",
-    "path": ".",
-    "githubReleaseAssetPrefix": "github-security-codescanning-alerts-skill"
-  }
+    "name": "github-manage-security-alerts-skill",
+    "version": "1.0.0",
+    "private": false,
+    "description": "Codex skill for inspecting and triaging GitHub security alerts.",
+    "keywords": [
+        "agent-skill",
+        "agent-skills",
+        "ai-agent",
+        "claude-code",
+        "code-scanning",
+        "codex",
+        "cursor",
+        "dependabot",
+        "gemini-cli",
+        "github-copilot",
+        "github-security",
+        "openai",
+        "openclaw",
+        "opencode",
+        "secret-scanning",
+        "universal",
+        "zed"
+    ],
+    "homepage": "https://github.com/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill#readme",
+    "bugs": {
+        "url": "https://github.com/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill.git"
+    },
+    "license": "Unlicense",
+    "author": "Nick2bad4u <20943337+Nick2bad4u@users.noreply.github.com> (https://github.com/Nick2bad4u)",
+    "contributors": [
+        {
+            "name": "Nick2bad4u",
+            "email": "20943337+Nick2bad4u@users.noreply.github.com",
+            "url": "https://github.com/Nick2bad4u"
+        }
+    ],
+    "type": "module",
+    "files": [
+        "SKILL.md",
+        "LICENSE.txt",
+        "agents/",
+        "assets/",
+        "scripts/",
+        "CHANGELOG.md",
+        "CONTRIBUTING.md",
+        "README.md",
+        "SECURITY.md"
+    ],
+    "scripts": {
+        "lint:package-json": "npmPkgJsonLint . --config .npmpackagejsonlintrc.json",
+        "lint:remark": "remark . --frail --ignore-path .remarkignore",
+        "lint:remark:fix": "remark . --ignore-path .remarkignore --output",
+        "pack:dry-run": "npm pack --dry-run",
+        "publish:local": "npm run release:verify && npm publish --access public",
+        "release:verify": "npm run validate && npm run pack:dry-run",
+        "update-actions": "npx actions-up --yes --style sha",
+        "validate": "node tools/validate-skill-package.mjs"
+    },
+    "devDependencies": {
+        "npm-package-json-lint": "^10.4.1",
+        "npm-package-json-lint-config-nick2bad4u": "^1.0.3",
+        "prettier": "^3.9.0",
+        "prettier-config-nick2bad4u": "^1.0.18",
+        "remark": "^15.0.1",
+        "remark-cli": "^12.0.1",
+        "remark-config-nick2bad4u": "^1.1.2"
+    },
+    "engines": {
+        "node": ">=22.14"
+    },
+    "publishConfig": {
+        "provenance": true,
+        "registry": "https://registry.npmjs.org/"
+    },
+    "codexSkill": {
+        "name": "github-manage-security-alerts",
+        "path": ".",
+        "githubReleaseAssetPrefix": "github-security-codescanning-alerts-skill"
+    }
 }

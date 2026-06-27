@@ -182,11 +182,11 @@ This repository includes a release workflow that creates a downloadable zip bund
 
 - Workflow: `.github/workflows/release-skill.yml`
 - Trigger:
-	- push a tag like `v0.1.0`
-	- run manually via **workflow_dispatch** with:
-		- `release_type`: `patch` / `minor` / `major`
-		- `version`: optional explicit `x.y.z` (overrides `release_type`)
-		- `ref`: branch to release from (default `main`)
+  - push a tag like `v0.1.0`
+  - run manually via **workflow_dispatch** with:
+    - `release_type`: `patch` / `minor` / `major`
+    - `version`: optional explicit `x.y.z` (overrides `release_type`)
+    - `ref`: branch to release from (default `main`)
 - Asset: `github-security-codescanning-alerts-skill-<tag>.zip`
 
 Examples:

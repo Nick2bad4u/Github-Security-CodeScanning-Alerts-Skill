@@ -1,9 +1,8 @@
 ---
-name: "github-manage-security-alerts"
-description: "Use when a user asks to inspect, triage, bulk-fix, bulk-dismiss, dismiss, reopen, resolve, assign, summarize, export, or configure GitHub repository security alerts across repositories, including code scanning, Dependabot, Dependabot malware, and secret scanning; securely reads the GitHub token from environment variables such as GITHUB_TOKEN"
+name: github-manage-security-alerts
+description: Use when the user asks to inspect, triage, summarize, export, or safely update GitHub security alerts for code scanning, Dependabot, malware, or secret scanning.
 license: "Unlicense"
-metadata:
-  short-description: "Inspect and triage GitHub security alerts"
+metadata: { "short-description": "Inspect and triage GitHub security alerts" }
 ---
 
 # GitHub Security Alerts Management
@@ -29,7 +28,7 @@ The bundled helper is repository-agnostic:
 - let it auto-detect `owner/repo` and the GitHub host from the git remote
 - or pass `--repository owner/repo` explicitly
 - authenticate via environment variable instead of putting a token on the command line
-- optionally override the API base URL for custom environments
+- optionally override the API or web base URL for custom environments
 
 ## Compatibility
 
@@ -40,12 +39,13 @@ Supports GitHub.com and standard GHES API base URL derivation from git remotes, 
 ## Invocation hints
 
 Use `repo` when the target is a local checkout, defaulting to `.`.
-Use optional `repository` and `token_env` values when auto-detection is not enough.
+Use optional `repository`, `api_base_url`, `web_base_url`, and `token_env` values when auto-detection is not enough.
 Common commands include `summary`, `export-alerts`, `bulk-update-alerts`, `repo-security-overview`, `list-code-scanning`, `show-code-scanning`, `update-code-scanning`, `list-dependabot`, `show-dependabot`, `update-dependabot`, `list-malware`, `show-malware`, `update-malware`, `list-secret-scanning`, `show-secret-scanning`, `update-secret-scanning`, `list-secret-locations`, `secret-scan-history`, and `api-call`.
 
 ## Security model
 
 Do not paste GitHub tokens into command arguments.
+Do not use `--show-secret-values` unless the user explicitly asks for unredacted secret values and confirms the exposure risk. Prefer redacted alert metadata, secret locations, validity, and resolution state. If unredacted output is required for remediation, do not paste secret material into chat, issue comments, PRs, commits, logs, or saved reports.
 
 Preferred pattern:
 
@@ -67,6 +67,7 @@ python "<path-to-skill>/scripts/manage_github_security_alerts.py" summary --repo
 - `repo`: path inside the target repository checkout (default `.`)
 - `repository`: optional explicit `owner/repo` override
 - `api_base_url`: optional explicit API base URL override
+- `web_base_url`: optional explicit web base URL override for rendered links
 - `token_env`: optional environment variable name containing the token; repeatable for fallbacks
 - `json`: optional machine-readable output flag
 
@@ -74,13 +75,13 @@ python "<path-to-skill>/scripts/manage_github_security_alerts.py" summary --repo
 
 GitHub surfaces malware findings as **Dependabot malware alerts**.
 
-There is not a separate repository alert family with its own dedicated REST surface. The bundled helper therefore treats malware as a filtered subset of Dependabot alerts and cross-references each alert's advisory GHSA against the GitHub Advisory Database to identify advisories whose type is `malware`.
+GitHub does not provide a separate repository alert family with its own dedicated REST surface. The bundled helper therefore treats malware as a filtered subset of Dependabot alerts and cross-references each alert's advisory GHSA against the GitHub Advisory Database to identify advisories whose type is `malware`.
 
 That means:
 
 - `list-malware`, `show-malware`, and `update-malware` are backed by Dependabot alert APIs
 - malware classification is strongest on GitHub.com, where the advisory database endpoint is available
-- if advisory type lookup is unavailable on the target host, the helper reports that clearly instead of silently guessing
+- if advisory type lookup is unavailable on the target host, the helper reports that state instead of silently guessing
 
 ## Quick start
 
@@ -150,7 +151,7 @@ python "<path-to-skill>/scripts/manage_github_security_alerts.py" list-malware -
 python "<path-to-skill>/scripts/manage_github_security_alerts.py" list-secret-scanning --repo "." --state open
 ```
 
-Secret values are hidden by default.
+Secret values are hidden by default. Keep that default unless the user explicitly confirms that unredacted secret output is necessary.
 
 ### 9. Resolve or reopen a secret scanning alert
 
@@ -190,7 +191,7 @@ python "<path-to-skill>/scripts/manage_github_security_alerts.py" api-call --rep
    - Fix real defects in code or dependency configuration when appropriate.
    - Dismiss only when you have a clear justification.
    - Reopen alerts when the earlier dismissal or resolution is no longer valid.
-   - Use `bulk-update-alerts` when a repository has dozens or hundreds of obviously mis-triaged alerts that need the same action.
+   - Use `bulk-update-alerts` when a repository has dozens or hundreds of already-reviewed, mis-triaged alerts that need the same action.
 5. Apply mutations carefully.
    - Prefer `--dry-run` first for risky changes.
    - Add a short, actionable dismissal or resolution comment.
