@@ -59,6 +59,8 @@
         "publish:local": "npm run release:verify && npm publish --access public",
         "release:verify": "npm run validate && npm run pack:dry-run",
         "update-actions": "npx actions-up --yes --style sha",
+        "update-all": "npm run update-actions && npm run update-deps",
+        "update-deps": "npx ncu -i --install never && npm update --force && npm install --force",
         "validate": "node tools/validate-skill-package.mjs"
     },
     "devDependencies": {

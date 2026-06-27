@@ -1,20 +1,62 @@
+# This is a Dependabot configuration file for automating dependency updates.
+# The configuration is set to version 2 of the Dependabot schema.
 # yaml-language-server: $schema=https://www.schemastore.org/dependabot-2.0.json
 version: 2
 
+multi-ecosystem-groups:
+    dependabot-all:
+        schedule:
+            interval: "monthly"
+            time: "05:30"
+            timezone: "America/Detroit"
+        assignees:
+            - "Nick2bad4u"
+        target-branch: "main"
+        commit-message:
+            prefix: "[dependabot][all]"
+            prefix-development: "[dependabot][dev][all]"
+            include: "scope"
+        labels:
+            - "dependabot"
+            - "dependencies"
+
 updates:
-    - package-ecosystem: github-actions
+    - package-ecosystem: "github-actions"
+      cooldown:
+          default-days: 3
+          include: ["*"]
       directory: "/"
-      schedule:
-          interval: quarterly
-          day: monday
-          time: "05:30"
-          timezone: "America/Detroit"
-      target-branch: "main"
-      rebase-strategy: auto
+      allow:
+          # Allow both direct and indirect updates for all packages
+          - dependency-type: "all"
       labels:
-          - "dependabot"
           - "github-actions"
-      commit-message:
-          prefix: "[dependabot][actions]"
-          include: "scope"
-      open-pull-requests-limit: 1
+      multi-ecosystem-group: "dependabot-all"
+      rebase-strategy: "auto"
+      patterns:
+          - "*"
+
+    - package-ecosystem: "npm"
+      cooldown:
+          default-days: 3
+          include: ["*"]
+      directory: "/"
+      groups:
+          npm-all:
+              applies-to: "version-updates"
+              patterns:
+                  - "*"
+      rebase-strategy: "auto"
+      versioning-strategy: "increase"
+      allow:
+          # Allow both direct and indirect updates for all packages
+          - dependency-type: "all"
+      ignore:
+          # Ignore local workspace dependencies completely
+          - dependency-name: "@shared/*"
+          - dependency-name: "file:*"
+      labels:
+          - "npm"
+      multi-ecosystem-group: "dependabot-all"
+      patterns:
+          - "*"
