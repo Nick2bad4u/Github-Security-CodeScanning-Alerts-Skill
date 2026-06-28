@@ -1,6 +1,6 @@
 ---
 name: github-manage-security-alerts
-description: Use when the user asks to inspect, triage, summarize, export, or safely update GitHub security alerts for code scanning, Dependabot, malware, or secret scanning.
+description: Manage GitHub security alerts. Use when the user asks to inspect, triage, summarize, export, or safely update code scanning, Dependabot, malware, or secret scanning findings.
 license: "Unlicense"
 metadata: { "short-description": "Inspect and triage GitHub security alerts" }
 ---
@@ -62,7 +62,7 @@ python "<path-to-skill>/scripts/manage_github_security_alerts.py" summary --repo
 python "<path-to-skill>/scripts/manage_github_security_alerts.py" summary --repo "." --token-env GITHUB_TOKEN
 ```
 
-## Inputs
+## Shared CLI options
 
 - `repo`: path inside the target repository checkout (default `.`)
 - `repository`: optional explicit `owner/repo` override
@@ -103,7 +103,10 @@ python "<path-to-skill>/scripts/manage_github_security_alerts.py" repo-security-
 python "<path-to-skill>/scripts/manage_github_security_alerts.py" export-alerts --repo "." --json
 ```
 
-### 3. List code scanning alerts
+### 3. Code scanning list example
+
+Uses shared inputs `repo`, `repository`, `api_base_url`, `web_base_url`, `token_env`, and `json`, plus code scanning filters such as `state`, `severity`, `tool_name`, `tool_guid`, `ref`, and `pr`.
+Outputs `code_scanning_alerts` as rendered text or machine-readable JSON.
 
 ```powershell
 python "<path-to-skill>/scripts/manage_github_security_alerts.py" list-code-scanning --repo "." --state open --severity high,error
@@ -126,7 +129,10 @@ python "<path-to-skill>/scripts/manage_github_security_alerts.py" update-code-sc
 python "<path-to-skill>/scripts/manage_github_security_alerts.py" update-code-scanning --repo "." --alert 42 --state open
 ```
 
-### 5. List Dependabot alerts
+### 5. Dependabot list example
+
+Uses shared inputs `repo`, `repository`, `api_base_url`, `web_base_url`, `token_env`, and `json`, plus Dependabot filters such as `state`, `severity`, `ecosystem`, `package`, `manifest`, `has`, `assignee`, and `scope`.
+Outputs `dependabot_alerts` as rendered text or machine-readable JSON.
 
 ```powershell
 python "<path-to-skill>/scripts/manage_github_security_alerts.py" list-dependabot --repo "." --state open --ecosystem npm --has patch
@@ -139,13 +145,19 @@ python "<path-to-skill>/scripts/manage_github_security_alerts.py" update-dependa
 python "<path-to-skill>/scripts/manage_github_security_alerts.py" update-dependabot --repo "." --alert 7 --state open
 ```
 
-### 7. List malware alerts
+### 7. Malware list example
+
+Uses shared inputs `repo`, `repository`, `api_base_url`, `web_base_url`, `token_env`, and `json`, plus Dependabot-backed malware filters such as `state`, `severity`, `ecosystem`, `package`, `manifest`, and `has`.
+Outputs `malware_alerts` and any `lookup_failures` from advisory type classification.
 
 ```powershell
 python "<path-to-skill>/scripts/manage_github_security_alerts.py" list-malware --repo "." --state open
 ```
 
-### 8. List secret scanning alerts safely
+### 8. Secret scanning list example
+
+Uses shared inputs `repo`, `repository`, `api_base_url`, `web_base_url`, `token_env`, and `json`, plus secret scanning filters such as `state`, `secret_type`, `resolution`, `assignee`, `validity`, and leak or multi-repository flags.
+Outputs `secret_scanning_alerts` with secret values redacted by default.
 
 ```powershell
 python "<path-to-skill>/scripts/manage_github_security_alerts.py" list-secret-scanning --repo "." --state open
@@ -202,9 +214,9 @@ python "<path-to-skill>/scripts/manage_github_security_alerts.py" api-call --rep
 
 ## Bundled resources
 
-### scripts/manage_github_security_alerts.py
+### Helper script
 
-Repository-agnostic helper for GitHub repository security alerts.
+`scripts/manage_github_security_alerts.py` is the repository-agnostic helper for GitHub repository security alerts.
 
 Supported commands:
 
