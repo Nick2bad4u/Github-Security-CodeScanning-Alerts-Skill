@@ -12,6 +12,7 @@
 **/dist/
 **/node_modules/
 **/playwright-report/
+**/.pytest_cache/
 **/temp/
 **/test-results/
 **/tmp/

@@ -1,0 +1,4 @@
+mypy>=2.1
+pyright>=1.1.410
+pytest>=8.0
+ruff>=0.15.20

@@ -1,3 +1,5 @@
+"""GitHub REST API helpers for the security alert CLI."""
+
 from __future__ import annotations
 
 import json
@@ -6,7 +8,7 @@ import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 from urllib import error, parse, request
 
 from github_security_common import GitHubSecurityCliError
@@ -16,6 +18,7 @@ DEFAULT_API_VERSION = "2026-03-10"
 DEFAULT_TOKEN_ENVS = ("GITHUB_TOKEN", "GH_TOKEN")
 GITHUB_DOT_COM_HOST = "github.com"
 GITHUB_DOT_COM_API_BASE = "https://api.github.com"
+MIN_REPOSITORY_PATH_SEGMENTS = 2
 
 
 @dataclass(frozen=True)
@@ -32,6 +35,7 @@ class RepoContext:
 
     @property
     def full_name(self) -> str:
+        """Return the owner/repository name used by GitHub APIs."""
         return f"{self.owner}/{self.repo}"
 
 
@@ -57,6 +61,7 @@ class GitHubApiError(GitHubSecurityCliError):
         status_code: int,
         url: str,
     ) -> None:
+        """Initialize the error with HTTP context for callers and renderers."""
         super().__init__(message)
         self.endpoint = endpoint
         self.response_data = response_data
@@ -66,7 +71,6 @@ class GitHubApiError(GitHubSecurityCliError):
 
 def run_git(repo_path: Path, *arguments: str) -> str:
     """Run a git command inside the target repository."""
-
     completed = subprocess.run(
         ["git", "-C", str(repo_path), *arguments],
         check=False,
@@ -76,8 +80,7 @@ def run_git(repo_path: Path, *arguments: str) -> str:
     if completed.returncode != 0:
         stderr = completed.stderr.strip()
         raise GitHubSecurityCliError(
-            f"Git command failed in '{repo_path}': git {' '.join(arguments)}"
-            + (f"\n{stderr}" if stderr else "")
+            f"Git command failed in '{repo_path}': git {' '.join(arguments)}" + (f"\n{stderr}" if stderr else "")
         )
 
     return completed.stdout.strip()
@@ -85,14 +88,11 @@ def run_git(repo_path: Path, *arguments: str) -> str:
 
 def parse_repository_input(repository: str) -> tuple[str, str, str, str]:
     """Parse owner/repo or a repository URL into host/owner/repo/base URL pieces."""
-
     repository = repository.strip()
     if not repository:
         raise GitHubSecurityCliError("Repository input cannot be empty.")
 
-    owner_repo_match = re.fullmatch(
-        r"(?P<owner>[^/]+)/(?P<repo>[^/]+)", repository
-    )
+    owner_repo_match = re.fullmatch(r"(?P<owner>[^/]+)/(?P<repo>[^/]+)", repository)
     if owner_repo_match:
         return (
             GITHUB_DOT_COM_HOST,
@@ -115,34 +115,25 @@ def parse_repository_input(repository: str) -> tuple[str, str, str, str]:
 
     parsed = parse.urlparse(repository)
     if parsed.scheme and parsed.netloc:
-        path_segments = [
-            segment for segment in parsed.path.split("/") if segment
-        ]
-        if len(path_segments) < 2:
-            raise GitHubSecurityCliError(
-                f"Could not parse owner/repo from repository URL '{repository}'."
-            )
+        path_segments = [segment for segment in parsed.path.split("/") if segment]
+        if len(path_segments) < MIN_REPOSITORY_PATH_SEGMENTS:
+            raise GitHubSecurityCliError(f"Could not parse owner/repo from repository URL '{repository}'.")
 
         repo_name = path_segments[-1]
-        if repo_name.endswith(".git"):
-            repo_name = repo_name[:-4]
+        repo_name = repo_name.removesuffix(".git")
 
         return parsed.netloc, path_segments[-2], repo_name, parsed.scheme
 
-    raise GitHubSecurityCliError(
-        f"Unsupported repository input '{repository}'. Use owner/repo or a GitHub URL."
-    )
+    raise GitHubSecurityCliError(f"Unsupported repository input '{repository}'. Use owner/repo or a GitHub URL.")
 
 
 def parse_remote_url(remote_url: str) -> tuple[str, str, str, str]:
     """Parse a git remote URL into host/owner/repo/scheme."""
-
     return parse_repository_input(remote_url)
 
 
 def resolve_token(token_envs: list[str] | None) -> tuple[str, str]:
     """Resolve the first non-empty token from the candidate environment variables."""
-
     candidates = token_envs or list(DEFAULT_TOKEN_ENVS)
 
     for candidate in candidates:
@@ -151,24 +142,21 @@ def resolve_token(token_envs: list[str] | None) -> tuple[str, str]:
             return candidate, token.strip()
 
     candidate_text = ", ".join(candidates)
-    raise GitHubSecurityCliError(
-        "Could not find a GitHub token in any configured environment variable "
-        f"({candidate_text}).\n"
+    message = (
+        f"Could not find a GitHub token in any configured environment variable ({candidate_text}).\n"
         "Populate one first, for example in PowerShell:\n"
         "$env:GITHUB_TOKEN = Get-Secret GITHUB_TOKEN -AsPlainText"
     )
+    raise GitHubSecurityCliError(message)
 
 
 def resolve_context(arguments: Any) -> RepoContext:
     """Resolve repository ownership, host, and token context."""
-
     repo_path = Path(arguments.repo).expanduser().resolve()
     token_env_name, token = resolve_token(arguments.token_envs)
 
     if arguments.repository is not None:
-        host, owner, repo_name, scheme = parse_repository_input(
-            arguments.repository
-        )
+        host, owner, repo_name, scheme = parse_repository_input(arguments.repository)
     else:
         remote_url = run_git(repo_path, "config", "--get", "remote.origin.url")
         host, owner, repo_name, scheme = parse_remote_url(remote_url)
@@ -194,7 +182,6 @@ def resolve_context(arguments: Any) -> RepoContext:
 
 def normalize_query_value(value: Any) -> str:
     """Normalize query-parameter values to GitHub-friendly strings."""
-
     if isinstance(value, bool):
         return "true" if value else "false"
 
@@ -203,7 +190,6 @@ def normalize_query_value(value: Any) -> str:
 
 def build_query_string(params: dict[str, Any] | None) -> str:
     """Serialize query parameters, omitting null values."""
-
     if not params:
         return ""
 
@@ -213,8 +199,8 @@ def build_query_string(params: dict[str, Any] | None) -> str:
         if value is None:
             continue
         if isinstance(value, list):
-            for item in value:
-                normalized_params.append((key, normalize_query_value(item)))
+            items = cast("list[object]", value)
+            normalized_params.extend((key, normalize_query_value(item)) for item in items)
             continue
         normalized_params.append((key, normalize_query_value(value)))
 
@@ -226,9 +212,9 @@ def build_query_string(params: dict[str, Any] | None) -> str:
 
 def extract_api_error_message(payload: Any) -> str:
     """Extract a readable message from a GitHub API error payload."""
-
     if isinstance(payload, dict):
-        message = payload.get("message")
+        payload_dict = cast("dict[str, Any]", payload)
+        message = payload_dict.get("message")
         if isinstance(message, str) and message.strip():
             return message.strip()
 
@@ -248,12 +234,8 @@ def api_request(
     accept: str = DEFAULT_ACCEPT,
 ) -> GitHubApiResponse:
     """Send a GitHub REST API request."""
-
     query_string = build_query_string(params)
-    if endpoint.startswith(("http://", "https://")):
-        url = endpoint
-    else:
-        url = f"{context.api_base_url}{endpoint}"
+    url = endpoint if endpoint.startswith(("http://", "https://")) else f"{context.api_base_url}{endpoint}"
     url = f"{url}{query_string}"
 
     request_body: bytes | None = None
@@ -279,16 +261,12 @@ def api_request(
 
     try:
         with request.urlopen(http_request) as response:
-            response_headers = {
-                key.lower(): value for key, value in response.headers.items()
-            }
+            response_headers = {key.lower(): value for key, value in response.headers.items()}
             raw_body = response.read()
             content_type = response_headers.get("content-type", "")
             if not raw_body:
                 parsed_body: Any = None
-            elif (
-                json_content_type in content_type or accept == DEFAULT_ACCEPT
-            ):
+            elif json_content_type in content_type or accept == DEFAULT_ACCEPT:
                 parsed_body = json.loads(raw_body.decode("utf-8"))
             else:
                 parsed_body = raw_body.decode("utf-8")
@@ -329,7 +307,6 @@ def safe_api_request(
     accept: str = DEFAULT_ACCEPT,
 ) -> dict[str, Any]:
     """Execute an API request and return a structured success/error result."""
-
     try:
         response = api_request(
             context,
