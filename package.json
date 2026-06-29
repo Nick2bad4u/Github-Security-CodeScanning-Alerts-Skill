@@ -85,6 +85,7 @@
         "skillcheck": "skillcheck --history SKILL.md --fail-on-regression",
         "test": "npm run test:python",
         "test:python": "pytest",
+        "test:python:coverage": "pytest --junitxml=test-report.junit.xml --cov=scripts --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=75",
         "typecheck": "npm run typecheck:python",
         "typecheck:python": "mypy && pyright",
         "update-actions": "npx actions-up --yes --style sha",

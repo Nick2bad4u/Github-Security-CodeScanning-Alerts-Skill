@@ -92,15 +92,6 @@ def parse_repository_input(repository: str) -> tuple[str, str, str, str]:
     if not repository:
         raise GitHubSecurityCliError("Repository input cannot be empty.")
 
-    owner_repo_match = re.fullmatch(r"(?P<owner>[^/]+)/(?P<repo>[^/]+)", repository)
-    if owner_repo_match:
-        return (
-            GITHUB_DOT_COM_HOST,
-            owner_repo_match.group("owner"),
-            owner_repo_match.group("repo"),
-            "https",
-        )
-
     remote_match = re.fullmatch(
         r"git@(?P<host>[^:]+):(?P<owner>[^/]+)/(?P<repo>[^/]+)(?:\.git)?",
         repository,
@@ -109,7 +100,16 @@ def parse_repository_input(repository: str) -> tuple[str, str, str, str]:
         return (
             remote_match.group("host"),
             remote_match.group("owner"),
-            remote_match.group("repo"),
+            remote_match.group("repo").removesuffix(".git"),
+            "https",
+        )
+
+    owner_repo_match = re.fullmatch(r"(?P<owner>[^/:]+)/(?P<repo>[^/:]+)", repository)
+    if owner_repo_match:
+        return (
+            GITHUB_DOT_COM_HOST,
+            owner_repo_match.group("owner"),
+            owner_repo_match.group("repo"),
             "https",
         )
 
@@ -278,7 +278,10 @@ def api_request(
                 url=url,
             )
     except error.HTTPError as exc:
-        raw_error_body = exc.read()
+        try:
+            raw_error_body = exc.read()
+        finally:
+            exc.close()
         content_type = exc.headers.get("Content-Type", "")
         if raw_error_body:
             if json_content_type in content_type:

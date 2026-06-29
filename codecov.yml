@@ -1,0 +1,34 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 75%
+        threshold: 1%
+    patch:
+      default:
+        target: 75%
+        threshold: 1%
+
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: false
+
+github_checks:
+  annotations: true
+
+flags:
+  python:
+    paths:
+      - scripts/
+
+component_management:
+  default_rules:
+    statuses:
+      - type: project
+        target: 75%
+  individual_components:
+    - component_id: python
+      name: Python
+      paths:
+        - scripts/**

@@ -107,7 +107,9 @@
                 "S607"     # Use PATH git so Git for Windows installations resolve normally.
             ]
             "tests/**/*.py" = [
-                "S101" # pytest uses assert rewriting.
+                "S101", # pytest uses assert rewriting.
+                "S105", # Security-domain tests use non-secret token/secret field names.
+                "S106"  # Security-domain tests use non-secret token/secret field names.
             ]
 
 [tool.mypy]
@@ -339,3 +341,15 @@
     strict_markers = true
     strict_parametrization_ids = true
     strict_xfail = true
+
+[tool.coverage.run]
+    branch = true
+    source = [ "scripts" ]
+
+[tool.coverage.report]
+    fail_under = 75
+    show_missing = true
+    skip_covered = false
+
+[tool.coverage.xml]
+    output = "coverage.xml"
