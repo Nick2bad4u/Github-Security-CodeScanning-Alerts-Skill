@@ -3,7 +3,6 @@
         "Cameron.vscode-pytest",
         "charliermarsh.ruff",
         "littlefoxteam.vscode-python-test-adapter",
-        "ms-pyright.pyright",
         "ms-python.debugpy",
         "ms-python.mypy-type-checker",
         "ms-python.python",
