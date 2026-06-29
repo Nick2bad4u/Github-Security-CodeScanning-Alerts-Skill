@@ -268,7 +268,7 @@ def get_alert_ghsa_id(alert: dict[str, Any]) -> str | None:
     if not isinstance(advisory, dict):
         return None
 
-    advisory_payload = cast("dict[str, Any]", advisory)
+    advisory_payload = expect_dict(advisory, "security advisory")
     direct_ghsa_id = non_empty_string(advisory_payload.get("ghsa_id"))
     if direct_ghsa_id is not None:
         return direct_ghsa_id
@@ -297,7 +297,7 @@ def ghsa_id_from_identifiers(identifiers: Any) -> str | None:
 def ghsa_id_from_identifier(identifier: Any) -> str | None:
     if not isinstance(identifier, dict):
         return None
-    identifier_payload = cast("dict[str, Any]", identifier)
+    identifier_payload = expect_dict(identifier, "security advisory identifier")
     if identifier_payload.get("type") != "GHSA":
         return None
     return non_empty_string(identifier_payload.get("value"))
@@ -789,7 +789,7 @@ def summarize_selected_alert(alert: dict[str, Any], surface: str) -> dict[str, A
     if surface == "code-scanning":
         rule = alert.get("rule")
         if isinstance(rule, dict):
-            rule_payload = cast("dict[str, Any]", rule)
+            rule_payload = expect_dict(rule, "code scanning rule")
             summary["rule_id"] = rule_payload.get("id") or rule_payload.get("name")
             summary["severity"] = rule_payload.get("security_severity_level") or rule_payload.get("severity")
         return summary
@@ -797,16 +797,16 @@ def summarize_selected_alert(alert: dict[str, Any], surface: str) -> dict[str, A
     if surface in {"dependabot", "malware"}:
         vulnerability = alert.get("security_vulnerability")
         if isinstance(vulnerability, dict):
-            vulnerability_payload = cast("dict[str, Any]", vulnerability)
+            vulnerability_payload = expect_dict(vulnerability, "security vulnerability")
             package = vulnerability_payload.get("package")
             if isinstance(package, dict):
-                package_payload = cast("dict[str, Any]", package)
+                package_payload = expect_dict(package, "security vulnerability package")
                 summary["package"] = package_payload.get("name")
                 summary["ecosystem"] = package_payload.get("ecosystem")
             summary["severity"] = vulnerability_payload.get("severity")
         dependency = alert.get("dependency")
         if isinstance(dependency, dict):
-            dependency_payload = cast("dict[str, Any]", dependency)
+            dependency_payload = expect_dict(dependency, "alert dependency")
             summary["manifest_path"] = dependency_payload.get("manifest_path")
         return summary
 

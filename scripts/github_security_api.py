@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, cast
 from urllib import error, parse, request
 
-from github_security_common import GitHubSecurityCliError
+from github_security_common import GitHubSecurityCliError, expect_dict
 
 DEFAULT_ACCEPT = "application/vnd.github+json"
 DEFAULT_API_VERSION = "2026-03-10"
@@ -180,6 +180,12 @@ def resolve_context(arguments: Any) -> RepoContext:
     )
 
 
+def require_https_url(url: str) -> None:
+    """Reject token-bearing API requests over plaintext HTTP."""
+    if parse.urlparse(url).scheme.lower() == "http":
+        raise GitHubSecurityCliError("GitHub API requests must use HTTPS URLs.")
+
+
 def normalize_query_value(value: Any) -> str:
     """Normalize query-parameter values to GitHub-friendly strings."""
     if isinstance(value, bool):
@@ -213,7 +219,7 @@ def build_query_string(params: dict[str, Any] | None) -> str:
 def extract_api_error_message(payload: Any) -> str:
     """Extract a readable message from a GitHub API error payload."""
     if isinstance(payload, dict):
-        payload_dict = cast("dict[str, Any]", payload)
+        payload_dict = expect_dict(payload, "API error")
         message = payload_dict.get("message")
         if isinstance(message, str) and message.strip():
             return message.strip()
@@ -237,6 +243,7 @@ def api_request(
     query_string = build_query_string(params)
     url = endpoint if endpoint.startswith(("http://", "https://")) else f"{context.api_base_url}{endpoint}"
     url = f"{url}{query_string}"
+    require_https_url(url)
 
     request_body: bytes | None = None
     headers = {

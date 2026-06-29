@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-from typing import Any
+from typing import Any, NoReturn
 
 import github_security_api
 import github_security_cli
@@ -17,6 +17,11 @@ from github_security_common import GitHubSecurityCliError
 def namespace(**values: object) -> Any:
     """Build a dynamic argparse-like namespace."""
     return SimpleNamespace(**values)
+
+
+def raise_cli_error(message: str) -> NoReturn:
+    """Raise a CLI error from monkeypatched callbacks."""
+    raise GitHubSecurityCliError(message)
 
 
 def test_main_resolves_context_handles_command_and_emits_output(monkeypatch: Any) -> None:
@@ -45,7 +50,7 @@ def test_main_prints_text_errors(monkeypatch: Any, capsys: Any) -> None:
     monkeypatch.setattr(
         github_security_api,
         "resolve_context",
-        lambda _arguments: (_ for _ in ()).throw(GitHubSecurityCliError("missing token")),
+        lambda _arguments: raise_cli_error("missing token"),
     )
 
     assert manage_github_security_alerts.main() == 1
@@ -62,7 +67,7 @@ def test_main_prints_json_errors(monkeypatch: Any, capsys: Any) -> None:
     monkeypatch.setattr(
         github_security_operations,
         "handle_command",
-        lambda _context, _arguments: (_ for _ in ()).throw(GitHubSecurityCliError("bad endpoint")),
+        lambda _context, _arguments: raise_cli_error("bad endpoint"),
     )
 
     assert manage_github_security_alerts.main() == 1

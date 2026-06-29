@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Callable
-from typing import Any, cast
+from typing import Any
 
 from github_security_common import expect_dict
 
@@ -46,15 +46,12 @@ def emit_output(payload: Any, *, as_json: bool, command: str) -> None:
         return
 
     text_payload: Any = payload
+    payload_dict: dict[str, Any] | None = None
     if command == "list-malware" and isinstance(payload, dict):
-        payload_dict = cast("dict[str, Any]", payload)
+        payload_dict = expect_dict(payload, "malware alert list")
         text_payload = payload_dict.get("alerts", [])
     print(render_text(command, text_payload))
-    if command == "list-malware" and isinstance(payload, dict):
-        payload_dict = cast("dict[str, Any]", payload)
-        lookup_failures = payload_dict.get("lookup_failures")
-    else:
-        lookup_failures = None
+    lookup_failures = payload_dict.get("lookup_failures") if payload_dict is not None else None
     if lookup_failures:
         print("\nMalware advisory lookup failures:")
         print(json.dumps(lookup_failures, indent=2, sort_keys=True))
@@ -248,7 +245,7 @@ def resolve_package_name(package: dict[str, Any], dependency: dict[str, Any]) ->
 
     dependency_package = dependency.get("package")
     if isinstance(dependency_package, dict):
-        dependency_payload = cast("dict[str, Any]", dependency_package)
+        dependency_payload = expect_dict(dependency_package, "dependency package")
         dependency_package_name = dependency_payload.get("name")
         if isinstance(dependency_package_name, str):
             return dependency_package_name
@@ -259,7 +256,7 @@ def resolve_package_name(package: dict[str, Any], dependency: dict[str, Any]) ->
 def resolve_ghsa_id(alert: dict[str, Any]) -> str:
     advisory = alert.get("security_advisory")
     if isinstance(advisory, dict):
-        advisory_payload = cast("dict[str, Any]", advisory)
+        advisory_payload = expect_dict(advisory, "security advisory")
         ghsa_id = advisory_payload.get("ghsa_id")
         if isinstance(ghsa_id, str) and ghsa_id:
             return ghsa_id

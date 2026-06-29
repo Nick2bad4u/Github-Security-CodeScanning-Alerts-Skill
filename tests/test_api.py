@@ -242,6 +242,12 @@ def test_api_request_handles_plain_text_response(monkeypatch: pytest.MonkeyPatch
     assert response.data == "accepted"
 
 
+def test_api_request_rejects_plaintext_http_endpoints() -> None:
+    """Token-bearing API requests must not use plaintext HTTP URLs."""
+    with pytest.raises(GitHubSecurityCliError, match="HTTPS URLs"):
+        _ = api_request(context(), endpoint="http://api.example.test/raw")
+
+
 def test_api_request_wraps_http_errors(monkeypatch: pytest.MonkeyPatch) -> None:
     """HTTP errors retain endpoint, URL, status, and parsed response details."""
     headers = Message()
