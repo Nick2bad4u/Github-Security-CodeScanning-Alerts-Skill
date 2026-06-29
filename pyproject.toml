@@ -1,10 +1,39 @@
 [tool.ruff]
-    force-exclude    = true
-    line-length      = 120
+    force-exclude = true
+    line-length = 120
     required-version = ">=0.15.20"
-    show-fixes       = true
-    target-version   = "py314"
-    src              = [ "scripts", "tests" ]
+    show-fixes = true
+    target-version = "py314"
+    src = [ "scripts", "tests" ]
+    respect-gitignore = true
+    indent-width = 4
+    cache-dir = ".cache/.ruff_cache"
+    extend-exclude = [
+        ".bzr",
+        ".cache",
+        ".git",
+        ".hg",
+        ".mypy_cache",
+        ".nox",
+        ".pytest_cache",
+        ".ruff_cache",
+        ".svn",
+        ".tox",
+        ".venv",
+        "__pycache__",
+        "__pypackages__",
+        "build",
+        "coverage",
+        "dist",
+        "env",
+        "htmlcov",
+        "node_modules",
+        "site-packages",
+        "third_party",
+        "tmp",
+        "vendor",
+        "venv"
+    ]
 
     [tool.ruff.format]
         docstring-code-format = true
@@ -19,11 +48,11 @@
     [tool.ruff.lint]
         select = [ "ALL" ]
         ignore = [
-            "ANN401", # GitHub API payloads are intentionally dynamic JSON at the boundary.
+            "ANN401", # Boundary payloads may be intentionally dynamic JSON.
             "COM812", # Conflicts with the formatter.
             "D203",   # Incompatible with D211.
             "D213",   # Incompatible with D212.
-            "INP001", # scripts/ is a direct-execution helper directory, not an import package.
+            "INP001", # Direct-execution helper folders are not always import packages.
             "EM101",  # CLI errors are clearer inline at the call site.
             "EM102",  # CLI errors are clearer inline at the call site.
             "ISC001", # Conflicts with the formatter.
@@ -84,7 +113,36 @@
 [tool.mypy]
     python_version = "3.14"
     files = [ "scripts", "tests" ]
+    cache_dir = ".cache/.mypy_cache"
+    raise_exceptions = true
+    fixed_format_cache = true
     mypy_path = "scripts"
+    exclude = '''(?x)(
+        (^|/)\.bzr/
+        | (^|/)\.cache/
+        | (^|/)\.git/
+        | (^|/)\.hg/
+        | (^|/)\.mypy_cache/
+        | (^|/)\.nox/
+        | (^|/)\.pytest_cache/
+        | (^|/)\.ruff_cache/
+        | (^|/)\.svn/
+        | (^|/)\.tox/
+        | (^|/)\.venv/
+        | (^|/)__pycache__/
+        | (^|/)__pypackages__/
+        | (^|/)build/
+        | (^|/)coverage/
+        | (^|/)dist/
+        | (^|/)env/
+        | (^|/)htmlcov/
+        | (^|/)node_modules/
+        | (^|/)site-packages/
+        | (^|/)third_party/
+        | (^|/)tmp/
+        | (^|/)vendor/
+        | (^|/)venv/
+    )'''
     strict = true
     disallow_any_decorated = true
     disallow_any_unimported = true
@@ -103,6 +161,7 @@
     warn_redundant_casts = true
     warn_return_any = true
     warn_unused_configs = true
+    num_workers = 0
     warn_unused_ignores = true
     warn_unreachable = true
     show_error_context = true
@@ -121,112 +180,162 @@
     ]
 
 [tool.pyright]
-    include                             = [ "scripts", "tests" ]
-    extraPaths                          = [ "scripts" ]
-    exclude                             = [ "**/.*", "**/__pycache__", ".mypy_cache", ".pytest_cache", ".ruff_cache", "node_modules" ]
-    pythonVersion                       = "3.14"
-    typeCheckingMode                    = "strict"
-    analyzeUnannotatedFunctions         = true
-    strictDictionaryInference           = true
-    strictListInference                 = true
-    strictSetInference                  = true
-    reportAbstractUsage                 = true
-    enableTypeIgnoreComments            = true
-    reportArgumentType                  = true
-    reportAssertAlwaysTrue              = true
-    reportAssertTypeFailure             = true
-    reportAssignmentType                = true
-    reportAttributeAccessIssue          = true
-    reportCallInDefaultInitializer      = true
-    reportCallIssue                     = true
-    reportConstantRedefinition          = true
-    reportDuplicateImport               = true
-    reportGeneralTypeIssues             = true
-    reportImportCycles                  = true
-    reportIncompatibleMethodOverride    = true
-    reportIncompatibleVariableOverride  = true
-    reportInvalidStringEscapeSequence   = true
-    reportInvalidTypeVarUse             = true
-    reportMissingImports                = true
-    reportMissingModuleSource           = true
-    reportMissingTypeArgument           = true
-    reportDeprecated                    = true
-    reportFunctionMemberAccess          = true
-    reportImplicitOverride              = true
-    reportIncompleteStub                = true
-    reportImplicitStringConcatenation   = true
-    reportInconsistentConstructor       = true
-    reportInconsistentOverload          = true
-    reportInvalidTypeArguments          = true
-    reportMatchNotExhaustive            = true
-    reportNoOverloadImplementation      = true
-    reportTypeCommentUsage              = true
-    reportMissingSuperCall              = true
-    reportUnboundVariable               = true
-    reportUntypedFunctionDecorator      = true
-    reportOptionalContextManager        = true
-    reportOptionalOperand               = true
-    reportUnusedCallResult              = true
-    reportOptionalIterable              = true
-    reportUndefinedVariable             = true
-    reportUnusedVariable                = true
-    reportPossiblyUnboundVariable       = true
-    reportUnusedExpression              = true
-    reportOperatorIssue                 = true
-    reportMissingParameterType          = true
-    reportOptionalSubscript             = true
-    reportTypedDictNotRequiredAccess    = true
-    reportUnusedImport                  = true
-    reportUnnecessaryCast               = true
-    reportPrivateUsage                  = true
-    reportReturnType                    = true
-    reportUnnecessaryIsInstance         = true
-    reportUnreachable                   = true
-    reportUntypedBaseClass              = true
-    reportUnsupportedDunderAll          = true
-    reportUntypedClassDecorator         = true
-    reportWildcardImportFromLibrary     = true
+    include = [ "scripts", "tests" ]
+    extraPaths = [ "scripts" ]
+    exclude = [
+        "**/.*",
+        "**/.bzr",
+        "**/.cache",
+        "**/.git",
+        "**/.hg",
+        "**/.mypy_cache",
+        "**/.nox",
+        "**/.pytest_cache",
+        "**/.ruff_cache",
+        "**/.svn",
+        "**/.tox",
+        "**/.venv",
+        "**/__pycache__",
+        "**/__pypackages__",
+        "**/build",
+        "**/coverage",
+        "**/dist",
+        "**/env",
+        "**/htmlcov",
+        "**/node_modules",
+        "**/site-packages",
+        "**/third_party",
+        "**/tmp",
+        "**/vendor",
+        "**/venv"
+    ]
+    pythonVersion = "3.14"
+    typeCheckingMode = "strict"
+    analyzeUnannotatedFunctions = true
+    strictDictionaryInference = true
+    strictListInference = true
+    strictSetInference = true
+    reportAbstractUsage = true
+    enableTypeIgnoreComments = true
+    reportArgumentType = true
+    reportAssertAlwaysTrue = true
+    reportAssertTypeFailure = true
+    reportAssignmentType = true
+    reportAttributeAccessIssue = true
+    reportCallInDefaultInitializer = true
+    reportCallIssue = true
+    reportConstantRedefinition = true
+    reportDuplicateImport = true
+    reportGeneralTypeIssues = true
+    reportImportCycles = true
+    reportIncompatibleMethodOverride = true
+    reportIncompatibleVariableOverride = true
+    reportInvalidStringEscapeSequence = true
+    reportInvalidTypeVarUse = true
+    reportMissingImports = true
+    reportMissingModuleSource = true
+    reportMissingTypeArgument = true
+    reportDeprecated = true
+    reportFunctionMemberAccess = true
+    reportImplicitOverride = true
+    reportIncompleteStub = true
+    reportImplicitStringConcatenation = true
+    reportInconsistentConstructor = true
+    reportInconsistentOverload = true
+    reportInvalidTypeArguments = true
+    reportMatchNotExhaustive = true
+    reportNoOverloadImplementation = true
+    reportTypeCommentUsage = true
+    reportMissingSuperCall = true
+    reportUnboundVariable = true
+    reportUntypedFunctionDecorator = true
+    reportOptionalContextManager = true
+    reportOptionalOperand = true
+    reportUnusedCallResult = true
+    reportOptionalIterable = true
+    reportUndefinedVariable = true
+    reportUnusedVariable = true
+    reportPossiblyUnboundVariable = true
+    reportUnusedExpression = true
+    reportOperatorIssue = true
+    reportMissingParameterType = true
+    reportOptionalSubscript = true
+    reportTypedDictNotRequiredAccess = true
+    reportUnusedImport = true
+    reportUnnecessaryCast = true
+    reportPrivateUsage = true
+    reportReturnType = true
+    reportUnnecessaryIsInstance = true
+    reportUnreachable = true
+    reportUntypedBaseClass = true
+    reportUnsupportedDunderAll = true
+    reportUntypedClassDecorator = true
+    reportWildcardImportFromLibrary = true
     reportUninitializedInstanceVariable = true
-    reportUnhashable                    = true
-    reportPrivateImportUsage            = true
-    strictParameterNoneValue            = true
-    reportInvalidTypeForm               = true
-    useLibraryCodeForTypes              = true
-    reportUnnecessaryContains           = true
-    pythonPlatform                      = "All"
-    reportUnusedCoroutine               = true
-    reportUnusedFunction                = true
-    reportUnnecessaryComparison         = true
-    reportUnusedClass                   = true
-    reportOverlappingOverload           = true
-    reportUnnecessaryTypeIgnoreComment  = true
-    reportPropertyTypeMismatch          = true
-    strict                              = [ "*/*.py", "scripts/**/*.py", "tests/**/*.py" ]
-    reportOptionalCall                  = true
-    reportSelfClsParameterName          = true
-    reportRedeclaration                 = true
-    reportUntypedNamedTuple             = true
-    reportOptionalMemberAccess          = true
-    reportUnusedExcept                  = true
-    reportIndexIssue                    = true
-    reportInvalidStubStatement          = true
-    enableReachabilityAnalysis          = true
-    deprecateTypingAliases              = true
-    disableBytesTypePromotions          = true
-    reportMissingTypeStubs              = "error"
-    reportUnknownArgumentType           = "error"
-    reportUnknownLambdaType             = "error"
-    reportUnknownMemberType             = "error"
-    reportUnknownParameterType          = "error"
-    reportUnknownVariableType           = "error"
+    reportUnhashable = true
+    reportPrivateImportUsage = true
+    strictParameterNoneValue = true
+    reportInvalidTypeForm = true
+    useLibraryCodeForTypes = true
+    reportUnnecessaryContains = true
+    pythonPlatform = "All"
+    reportUnusedCoroutine = true
+    reportUnusedFunction = true
+    reportUnnecessaryComparison = true
+    reportUnusedClass = true
+    reportOverlappingOverload = true
+    reportUnnecessaryTypeIgnoreComment = true
+    reportPropertyTypeMismatch = true
+    strict = [ "*/*.py", "scripts/**/*.py", "tests/**/*.py" ]
+    reportOptionalCall = true
+    reportSelfClsParameterName = true
+    reportRedeclaration = true
+    reportUntypedNamedTuple = true
+    reportOptionalMemberAccess = true
+    reportUnusedExcept = true
+    reportIndexIssue = true
+    reportInvalidStubStatement = true
+    enableReachabilityAnalysis = true
+    deprecateTypingAliases = true
+    disableBytesTypePromotions = true
+    reportMissingTypeStubs = "error"
+    reportUnknownArgumentType = "error"
+    reportUnknownLambdaType = "error"
+    reportUnknownMemberType = "error"
+    reportUnknownParameterType = "error"
+    reportUnknownVariableType = "error"
 
 [tool.pytest.ini_options]
-    addopts                    = [ "--strict-config", "--strict-markers", "--import-mode=importlib" ]
-    filterwarnings             = [ "error" ]
-    pythonpath                 = [ "scripts" ]
-    testpaths                  = [ "tests" ]
-    strict                     = true
-    strict_config              = true
-    strict_markers             = true
+    addopts = [ "--strict-config", "--strict-markers", "--import-mode=importlib" ]
+    filterwarnings = [ "error" ]
+    junit_duration_report = "call"
+    junit_family = "xunit2"
+    doctest_encoding = "utf-8"
+    console_output_style = "progress"
+    junit_logging = "log"
+    junit_log_passing_tests = true
+    junit_suite_name = "python-junit"
+    pythonpath = [ "scripts" ]
+    cache_dir = ".cache/.pytest_cache"
+    testpaths = [ "tests" ]
+    norecursedirs = [
+        ".*",
+        "__pycache__",
+        "__pypackages__",
+        "build",
+        "coverage",
+        "dist",
+        "env",
+        "htmlcov",
+        "node_modules",
+        "site-packages",
+        "third_party",
+        "tmp",
+        "vendor",
+        "venv"
+    ]
+    strict = true
+    strict_config = true
+    strict_markers = true
     strict_parametrization_ids = true
-    strict_xfail               = true
+    strict_xfail = true
