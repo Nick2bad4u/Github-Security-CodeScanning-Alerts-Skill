@@ -45,6 +45,10 @@ agents/
 assets/
   github-manage-security-alerts-small.svg
   github-manage-security-alerts.png
+references/
+  command-guide.md
+  github-mcp-guide.md
+  security-triage-guide.md
 scripts/
   manage_github_security_alerts.py
   github_security_api.py
@@ -73,7 +77,7 @@ npm install --save-dev github-manage-security-alerts-skill
 npx skills experimental_sync --agent universal -y
 ```
 
-OpenAI-specific display metadata lives in `agents/openai.yaml`. The portable skill contract is `SKILL.md` plus the referenced `assets/` and `scripts/` files.
+OpenAI-specific display metadata lives in `agents/openai.yaml`. The portable skill contract is `SKILL.md` plus the referenced `assets/`, `references/`, and `scripts/` files.
 
 ---
 
@@ -154,6 +158,9 @@ python "scripts/manage_github_security_alerts.py" bulk-update-alerts --repo "." 
 For the full command surface and workflows, see:
 
 - `SKILL.md`
+- [`references/command-guide.md`](./references/command-guide.md)
+- [`references/github-mcp-guide.md`](./references/github-mcp-guide.md)
+- [`references/security-triage-guide.md`](./references/security-triage-guide.md)
 
 ---
 

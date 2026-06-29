@@ -45,6 +45,7 @@
         "LICENSE.txt",
         "agents/",
         "assets/",
+        "references/",
         "scripts/",
         "!scripts/**/__pycache__/",
         "!scripts/**/*.pyc",

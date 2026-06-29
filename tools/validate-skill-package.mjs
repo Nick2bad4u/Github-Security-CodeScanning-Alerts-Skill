@@ -93,6 +93,7 @@ for (const requiredFile of [
     "LICENSE.txt",
     "agents/",
     "assets/",
+    "references/",
     "scripts/",
     "README.md",
     "CHANGELOG.md",
@@ -122,6 +123,10 @@ const openAiMetadata = await readFile(
     path.join(root, openAiMetadataPath),
     "utf8"
 );
+const releaseWorkflow = await readFile(
+    path.join(root, ".github/workflows/release-skill.yml"),
+    "utf8"
+);
 
 assert(skillMd.startsWith("---"), "SKILL.md must start with YAML frontmatter");
 assert(
@@ -146,11 +151,20 @@ assert(
 );
 assert(smallIcon, "agents/openai.yaml must define icon_small");
 assert(largeIcon, "agents/openai.yaml must define icon_large");
+assert(
+    /\bSKILL\.md LICENSE\.txt agents assets references scripts\b/.test(
+        releaseWorkflow
+    ),
+    "release-skill workflow bundle must include references/"
+);
 
 await Promise.all([
     assertFile(skillRelative(stripCurrentDirectoryPrefix(smallIcon))),
     assertFile(skillRelative(stripCurrentDirectoryPrefix(largeIcon))),
     assertFile(skillRelative("LICENSE.txt")),
+    assertFile(skillRelative("references/command-guide.md")),
+    assertFile(skillRelative("references/github-mcp-guide.md")),
+    assertFile(skillRelative("references/security-triage-guide.md")),
 ]);
 
 console.log(`Validated ${pkg.name} skill package metadata.`);
