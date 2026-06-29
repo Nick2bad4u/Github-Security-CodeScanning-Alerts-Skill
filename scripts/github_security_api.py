@@ -19,6 +19,7 @@ DEFAULT_TOKEN_ENVS = ("GITHUB_TOKEN", "GH_TOKEN")
 GITHUB_DOT_COM_HOST = "github.com"
 GITHUB_DOT_COM_API_BASE = "https://api.github.com"
 MIN_REPOSITORY_PATH_SEGMENTS = 2
+ABSOLUTE_URL_SCHEMES = frozenset({"http", "https"})
 
 
 @dataclass(frozen=True)
@@ -241,7 +242,8 @@ def api_request(
 ) -> GitHubApiResponse:
     """Send a GitHub REST API request."""
     query_string = build_query_string(params)
-    url = endpoint if endpoint.startswith(("http://", "https://")) else f"{context.api_base_url}{endpoint}"
+    endpoint_scheme = parse.urlparse(endpoint).scheme.lower()
+    url = endpoint if endpoint_scheme in ABSOLUTE_URL_SCHEMES else f"{context.api_base_url}{endpoint}"
     url = f"{url}{query_string}"
     require_https_url(url)
 

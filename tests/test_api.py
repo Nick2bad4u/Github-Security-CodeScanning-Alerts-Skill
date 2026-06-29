@@ -10,7 +10,7 @@ from http import HTTPStatus
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, ClassVar, Self
-from urllib import error
+from urllib import error, parse
 
 import pytest
 
@@ -244,8 +244,10 @@ def test_api_request_handles_plain_text_response(monkeypatch: pytest.MonkeyPatch
 
 def test_api_request_rejects_plaintext_http_endpoints() -> None:
     """Token-bearing API requests must not use plaintext HTTP URLs."""
+    endpoint = parse.urlunparse(("http", "api.example.test", "/raw", "", "", ""))
+
     with pytest.raises(GitHubSecurityCliError, match="HTTPS URLs"):
-        _ = api_request(context(), endpoint="http://api.example.test/raw")
+        _ = api_request(context(), endpoint=endpoint)
 
 
 def test_api_request_wraps_http_errors(monkeypatch: pytest.MonkeyPatch) -> None:
