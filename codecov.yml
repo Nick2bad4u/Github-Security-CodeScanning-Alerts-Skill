@@ -20,7 +20,7 @@ github_checks:
 flags:
   python:
     paths:
-      - scripts/
+      - skills/github-manage-security-alerts/scripts/
 
 component_management:
   default_rules:
@@ -31,4 +31,4 @@ component_management:
     - component_id: python
       name: Python
       paths:
-        - scripts/**
+        - skills/github-manage-security-alerts/scripts/**

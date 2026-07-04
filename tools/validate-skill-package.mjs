@@ -87,14 +87,12 @@ assert(
         "git+https://github.com/Nick2bad4u/Github-Security-CodeScanning-Alerts-Skill.git",
     "repository.url must exactly match the GitHub repository for npm trusted publishing"
 );
-assert(skill.path === ".", "codexSkill.path must point at the repository root");
+assert(
+    skill.path === "skills/github-manage-security-alerts",
+    "codexSkill.path must point at skills/github-manage-security-alerts"
+);
 for (const requiredFile of [
-    "SKILL.md",
-    "LICENSE.txt",
-    "agents/",
-    "assets/",
-    "references/",
-    "scripts/",
+    "skills/",
     "README.md",
     "CHANGELOG.md",
     "SECURITY.md",
@@ -105,6 +103,12 @@ for (const requiredFile of [
     );
 }
 for (const forbiddenFile of [
+    "SKILL.md",
+    "LICENSE.txt",
+    "agents/",
+    "assets/",
+    "references/",
+    "scripts/",
     ".github/skills/",
     ".github/instructions/",
     "dist/",
@@ -152,10 +156,8 @@ assert(
 assert(smallIcon, "agents/openai.yaml must define icon_small");
 assert(largeIcon, "agents/openai.yaml must define icon_large");
 assert(
-    /\bSKILL\.md LICENSE\.txt agents assets references scripts\b/.test(
-        releaseWorkflow
-    ),
-    "release-skill workflow bundle must include references/"
+    /\bskills\/github-manage-security-alerts\b/.test(releaseWorkflow),
+    "release-skill workflow bundle must include the nested skill directory"
 );
 
 await Promise.all([

@@ -36,7 +36,7 @@ body:
       description: Include exact commands where possible.
       placeholder: |
         1. Set GITHUB_TOKEN ...
-        2. Run `python "scripts/manage_github_security_alerts.py" summary --repo "."`
+        2. Run `python "skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" summary --repo "."`
         3. Observe ...
     validations:
       required: true
@@ -60,7 +60,7 @@ body:
     attributes:
       label: Affected area
       options:
-        - Skill documentation (SKILL.md)
+        - Skill documentation (skills/github-manage-security-alerts/SKILL.md)
         - Python CLI helper
         - GitHub workflow automation
         - Hook scripts

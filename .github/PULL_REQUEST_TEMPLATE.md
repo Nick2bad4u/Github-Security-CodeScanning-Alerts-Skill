@@ -19,8 +19,8 @@
 <!-- Include commands and outcomes. -->
 
 ```text
-python -m compileall scripts
-python scripts/manage_github_security_alerts.py --help
+python -m compileall skills/github-manage-security-alerts/scripts
+python skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py --help
 ```
 
 ## Security / safety checklist

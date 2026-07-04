@@ -62,7 +62,7 @@ build:
                       - "dist/**/*"
                       - "plugin.mjs"
                       - "plugin.d.mts"
-                      - "scripts/**/*"
+                      - "skills/**/scripts/**/*"
                       - "tsconfig.build.json"
                       - "vite.config.ts"
       - title:

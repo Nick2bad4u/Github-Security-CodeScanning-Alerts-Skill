@@ -4,7 +4,7 @@
     required-version = ">=0.15.20"
     show-fixes = true
     target-version = "py314"
-    src = [ "scripts", "tests" ]
+    src = [ "skills/github-manage-security-alerts/scripts", "tests" ]
     respect-gitignore = true
     indent-width = 4
     cache-dir = ".cache/.ruff_cache"
@@ -80,27 +80,27 @@
             strict = true
 
         [tool.ruff.lint.per-file-ignores]
-            "scripts/manage_github_security_alerts.py" = [
+            "skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" = [
                 "PLC0415", # Imports must happen after sys.path is bootstrapped for direct script execution.
                 "T201"     # CLI entrypoint writes user-facing output.
             ]
-            "scripts/github_security_render.py" = [
+            "skills/github-manage-security-alerts/scripts/github_security_render.py" = [
                 "D103", # Internal render helpers are named for their behavior.
                 "T201"  # Rendering layer is responsible for CLI output.
             ]
-            "scripts/github_security_cli.py" = [
+            "skills/github-manage-security-alerts/scripts/github_security_cli.py" = [
                 "D103",  # Argparse builder helpers are named for the parser surface they create.
                 "S105",  # Help text contains "secret" but no credential material.
                 "SLF001" # argparse exposes subparser action only through a private typed name.
             ]
-            "scripts/github_security_operations.py" = [
+            "skills/github-manage-security-alerts/scripts/github_security_operations.py" = [
                 "C901",    # Command handlers are intentionally direct dispatchers.
                 "D103",    # Command helper names map directly to API and CLI behavior.
                 "PLR0912", # Command handlers are intentionally direct dispatchers.
                 "PLR0913", # GitHub API wrappers mirror endpoint parameters.
                 "PLR0915"  # Command handlers are intentionally direct dispatchers.
             ]
-            "scripts/github_security_api.py" = [
+            "skills/github-manage-security-alerts/scripts/github_security_api.py" = [
                 "PLR0913", # GitHub API wrappers mirror endpoint parameters.
                 "S310",    # API URLs are resolved from GitHub repository context and explicit user configuration.
                 "S603",    # The only subprocess call invokes git with fixed arguments.
@@ -114,11 +114,11 @@
 
 [tool.mypy]
     python_version = "3.14"
-    files = [ "scripts", "tests" ]
+    files = [ "skills/github-manage-security-alerts/scripts", "tests" ]
     cache_dir = ".cache/.mypy_cache"
     raise_exceptions = true
     fixed_format_cache = true
-    mypy_path = "scripts"
+    mypy_path = "skills/github-manage-security-alerts/scripts"
     exclude = '''(?x)(
         (^|/)\.bzr/
         | (^|/)\.cache/
@@ -182,8 +182,8 @@
     ]
 
 [tool.pyright]
-    include = [ "scripts", "tests" ]
-    extraPaths = [ "scripts" ]
+    include = [ "skills/github-manage-security-alerts/scripts", "tests" ]
+    extraPaths = [ "skills/github-manage-security-alerts/scripts" ]
     exclude = [
         "**/.*",
         "**/.bzr",
@@ -288,7 +288,7 @@
     reportOverlappingOverload = true
     reportUnnecessaryTypeIgnoreComment = true
     reportPropertyTypeMismatch = true
-    strict = [ "*/*.py", "scripts/**/*.py", "tests/**/*.py" ]
+    strict = [ "*/*.py", "skills/github-manage-security-alerts/scripts/**/*.py", "tests/**/*.py" ]
     reportOptionalCall = true
     reportSelfClsParameterName = true
     reportRedeclaration = true
@@ -317,7 +317,7 @@
     junit_logging = "log"
     junit_log_passing_tests = true
     junit_suite_name = "python-junit"
-    pythonpath = [ "scripts" ]
+    pythonpath = [ "skills/github-manage-security-alerts/scripts" ]
     cache_dir = ".cache/.pytest_cache"
     testpaths = [ "tests" ]
     norecursedirs = [
@@ -344,7 +344,7 @@
 
 [tool.coverage.run]
     branch = true
-    source = [ "scripts" ]
+    source = [ "skills/github-manage-security-alerts/scripts" ]
 
 [tool.coverage.report]
     fail_under = 75

@@ -11,7 +11,7 @@ An open-agent skill for inspecting and managing GitHub repository security alert
 
 This repository provides:
 
-- a reusable `github-manage-security-alerts` skill (`SKILL.md`)
+- a reusable `github-manage-security-alerts` skill (`skills/github-manage-security-alerts/SKILL.md`)
 - a Python CLI helper to inspect and triage alerts
 - GitHub automation for release/security hygiene
 
@@ -39,23 +39,26 @@ With a GitHub token in an environment variable, you can:
 ## Repository layout
 
 ```text
-SKILL.md
-agents/
-  openai.yaml
-assets/
-  github-manage-security-alerts-small.svg
-  github-manage-security-alerts.png
-references/
-  command-guide.md
-  github-mcp-guide.md
-  security-triage-guide.md
-scripts/
-  manage_github_security_alerts.py
-  github_security_api.py
-  github_security_cli.py
-  github_security_common.py
-  github_security_operations.py
-  github_security_render.py
+skills/
+  github-manage-security-alerts/
+    SKILL.md
+    LICENSE.txt
+    agents/
+      openai.yaml
+    assets/
+      github-manage-security-alerts-small.svg
+      github-manage-security-alerts.png
+    references/
+      command-guide.md
+      github-mcp-guide.md
+      security-triage-guide.md
+    scripts/
+      manage_github_security_alerts.py
+      github_security_api.py
+      github_security_cli.py
+      github_security_common.py
+      github_security_operations.py
+      github_security_render.py
 README.md
 CONTRIBUTING.md
 SECURITY.md
@@ -66,7 +69,7 @@ CHANGELOG.md
 
 ## Agent compatibility
 
-This is a root `SKILL.md` package. `npx skills` can install it directly from GitHub, and `npx skills experimental_sync` can discover it from `node_modules` because the npm package ships `SKILL.md` at the package root.
+This package uses the `skills/github-manage-security-alerts/` layout so `npx skills` installs the skill with its referenced `agents/`, `assets/`, `references/`, and `scripts/` directories intact.
 
 Use `--agent universal` for agents that consume the shared `.agents/skills` layout. Use `--agent "*"` only when you intentionally want to install to every supported agent directory.
 
@@ -77,7 +80,7 @@ npm install --save-dev github-manage-security-alerts-skill
 npx skills experimental_sync --agent universal -y
 ```
 
-OpenAI-specific display metadata lives in `agents/openai.yaml`. The portable skill contract is `SKILL.md` plus the referenced `assets/`, `references/`, and `scripts/` files.
+OpenAI-specific display metadata lives in `skills/github-manage-security-alerts/agents/openai.yaml`. The portable skill contract is `skills/github-manage-security-alerts/SKILL.md` plus the referenced `assets/`, `references/`, and `scripts/` files in the same skill directory.
 
 ---
 
@@ -122,13 +125,13 @@ export GITHUB_TOKEN="<your-token>"
 From repository root:
 
 ```powershell
-python "scripts/manage_github_security_alerts.py" summary --repo "."
+python "skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" summary --repo "."
 ```
 
 Machine-readable output:
 
 ```powershell
-python "scripts/manage_github_security_alerts.py" summary --repo "." --json
+python "skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" summary --repo "." --json
 ```
 
 ---
@@ -137,30 +140,30 @@ python "scripts/manage_github_security_alerts.py" summary --repo "." --json
 
 ```powershell
 # Export full alert sets for triage
-python "scripts/manage_github_security_alerts.py" export-alerts --repo "." --json
+python "skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" export-alerts --repo "." --json
 
 # List open high/error code scanning alerts
-python "scripts/manage_github_security_alerts.py" list-code-scanning --repo "." --state open --severity high,error
+python "skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" list-code-scanning --repo "." --state open --severity high,error
 
 # Dismiss a code scanning alert (dry-run first)
-python "scripts/manage_github_security_alerts.py" update-code-scanning --repo "." --alert 42 --state dismissed --dismissed-reason false_positive --comment "False positive after review." --dry-run
+python "skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" update-code-scanning --repo "." --alert 42 --state dismissed --dismissed-reason false_positive --comment "False positive after review." --dry-run
 
 # List open Dependabot alerts
-python "scripts/manage_github_security_alerts.py" list-dependabot --repo "." --state open
+python "skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" list-dependabot --repo "." --state open
 
 # List open secret scanning alerts
-python "scripts/manage_github_security_alerts.py" list-secret-scanning --repo "." --state open
+python "skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" list-secret-scanning --repo "." --state open
 
 # Bulk update (preview only)
-python "scripts/manage_github_security_alerts.py" bulk-update-alerts --repo "." --surface code-scanning --select-state open --target-state dismissed --dismissed-reason "false positive" --comment "Reviewed and intentionally dismissed." --limit 10 --dry-run --json
+python "skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py" bulk-update-alerts --repo "." --surface code-scanning --select-state open --target-state dismissed --dismissed-reason "false positive" --comment "Reviewed and intentionally dismissed." --limit 10 --dry-run --json
 ```
 
 For the full command surface and workflows, see:
 
-- `SKILL.md`
-- [`references/command-guide.md`](./references/command-guide.md)
-- [`references/github-mcp-guide.md`](./references/github-mcp-guide.md)
-- [`references/security-triage-guide.md`](./references/security-triage-guide.md)
+- `skills/github-manage-security-alerts/SKILL.md`
+- [`references/command-guide.md`](./skills/github-manage-security-alerts/references/command-guide.md)
+- [`references/github-mcp-guide.md`](./skills/github-manage-security-alerts/references/github-mcp-guide.md)
+- [`references/security-triage-guide.md`](./skills/github-manage-security-alerts/references/security-triage-guide.md)
 
 ---
 

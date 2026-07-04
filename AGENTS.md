@@ -6,14 +6,14 @@ applyTo: "**"
 
 # GitHub Security Alerts Skill Guidance
 
-This repository packages the `github-manage-security-alerts` Codex/open-agent skill. Keep changes focused on the root skill payload and the small repository automation needed to publish it.
+This repository packages the `github-manage-security-alerts` Codex/open-agent skill. Keep changes focused on the nested skill payload and the small repository automation needed to publish it.
 
 ## Scope
 
-- Treat `SKILL.md` as the user-facing skill entrypoint.
-- Treat `scripts/manage_github_security_alerts.py` as the CLI entrypoint.
-- Keep helper modules in `scripts/` stdlib-only unless a dependency is explicitly justified and documented.
-- Keep `agents/openai.yaml`, `assets/`, and `LICENSE.txt` synchronized with the packaged skill.
+- Treat `skills/github-manage-security-alerts/SKILL.md` as the user-facing skill entrypoint.
+- Treat `skills/github-manage-security-alerts/scripts/manage_github_security_alerts.py` as the CLI entrypoint.
+- Keep helper modules in `skills/github-manage-security-alerts/scripts/` stdlib-only unless a dependency is explicitly justified and documented.
+- Keep `skills/github-manage-security-alerts/agents/openai.yaml`, `assets/`, and `LICENSE.txt` synchronized with the packaged skill.
 
 ## Security
 
@@ -27,7 +27,7 @@ This repository packages the `github-manage-security-alerts` Codex/open-agent sk
 Run the narrowest useful checks after edits:
 
 ```powershell
-python -m compileall scripts
+python -m compileall skills/github-manage-security-alerts/scripts
 npm run release:verify
 ```
 

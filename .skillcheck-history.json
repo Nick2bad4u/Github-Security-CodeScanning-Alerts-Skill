@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "skill_path": "SKILL.md",
+  "skill_path": "skills/github-manage-security-alerts/SKILL.md",
   "runs": [
     {
       "timestamp_utc": "2026-06-28T05:37:23Z",
