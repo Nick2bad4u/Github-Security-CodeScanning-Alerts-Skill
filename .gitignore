@@ -899,3 +899,5 @@ docs/docusaurus/static/.well-known/appspecific/com.chrome.devtools.json
 
 # Other skills
 .github/skills/gh-fix-ci
+.lychee.report.md
+.lycheecache
