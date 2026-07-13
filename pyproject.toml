@@ -347,7 +347,7 @@
     source = [ "skills/github-manage-security-alerts/scripts" ]
 
 [tool.coverage.report]
-    fail_under = 75
+    fail_under   = 75
     show_missing = true
     skip_covered = false
 

@@ -1,0 +1,13 @@
+SECURITY.md:nick2bad4u-sensitive-env-vars:34
+skills/github-manage-security-alerts/SKILL.md:nick2bad4u-sensitive-env-vars:47
+skills/github-manage-security-alerts/scripts/github_security_api.py:nick2bad4u-sensitive-env-vars:18
+skills/github-manage-security-alerts/scripts/github_security_api.py:nick2bad4u-sensitive-env-vars:149
+tests/test_api.py:nick2bad4u-sensitive-env-vars:83
+tests/test_api.py:nick2bad4u-sensitive-env-vars:129
+tests/test_api.py:nick2bad4u-sensitive-env-vars:135
+tests/test_api.py:nick2bad4u-sensitive-env-vars:154
+tests/test_operations.py:nick2bad4u-sensitive-env-vars:52
+3aefc05:.github/skills/github-manage-security-alerts/scripts/github_security_api.py:nick2bad4u-sensitive-env-vars:16
+3aefc05:.github/skills/github-manage-security-alerts/scripts/github_security_api.py:nick2bad4u-sensitive-env-vars:158
+3aefc05:.github/skills/github-manage-security-alerts/SKILL.md:nick2bad4u-sensitive-env-vars:43
+d6e33c6:.github/skills/sonar-manage-findings/SKILL.md:nick2bad4u-sensitive-env-vars:50
