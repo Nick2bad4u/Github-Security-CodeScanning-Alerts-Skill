@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Nick2bad4u
+
 """Shared constants, exceptions, and validation helpers for the CLI."""
 
 from __future__ import annotations

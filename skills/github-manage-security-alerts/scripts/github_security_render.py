@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Nick2bad4u
+
 """Text and JSON rendering for GitHub security alert command output."""
 
 from __future__ import annotations

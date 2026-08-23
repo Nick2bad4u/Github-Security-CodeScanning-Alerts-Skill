@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Nick2bad4u
+
 """Tests for security alert operation helpers."""
 # pyright: reportUnknownArgumentType=false, reportUnknownLambdaType=false, reportUnknownVariableType=false
 

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Nick2bad4u
+
 """Command handlers and GitHub security alert operations."""
 
 from __future__ import annotations

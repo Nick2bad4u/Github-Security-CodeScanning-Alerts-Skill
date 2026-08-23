@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Nick2bad4u
+
 """GitHub REST API helpers for the security alert CLI."""
 
 from __future__ import annotations

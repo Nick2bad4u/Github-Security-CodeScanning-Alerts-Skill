@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Nick2bad4u
+
 """Tests for the executable CLI entry point."""
 # pyright: reportUnknownLambdaType=false
 
