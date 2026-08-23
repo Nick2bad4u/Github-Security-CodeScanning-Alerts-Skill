@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Copyright (c) 2026 Nick2bad4u
+
 """Inspect and manage GitHub repository security alerts."""
 
 from __future__ import annotations

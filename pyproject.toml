@@ -343,8 +343,9 @@
     strict_xfail = true
 
 [tool.coverage.run]
-    branch = true
-    source = [ "skills/github-manage-security-alerts/scripts" ]
+    branch         = true
+    include        = [ "skills/github-manage-security-alerts/scripts/*.py" ]
+    relative_files = true
 
 [tool.coverage.report]
     fail_under   = 75

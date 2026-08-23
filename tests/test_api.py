@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Nick2bad4u
+
 """Tests for GitHub API context and request helpers."""
 # pyright: reportUnknownArgumentType=false, reportUnknownLambdaType=false
 

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Nick2bad4u
+
 """Tests for text rendering behavior."""
 
 from __future__ import annotations
